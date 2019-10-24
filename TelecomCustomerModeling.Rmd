@@ -11,7 +11,11 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
 ```
 
 ```{r}
@@ -21,3 +25,31 @@ customer_churn <- read.csv("Telco_customer_churn.csv")
 
 # Explanatory Data Analysis
 
+## Overview of data 
+
+```{r}
+summary_table <- customer_churn %>% 
+  summarize(n_observations = length(CustomerID),
+            average_tenure_months = mean(Tenure.Months),
+            min_tenure_months = min(Tenure.Months),
+            max_tenure_months = max(Tenure.Months))
+
+
+kable(summary_table, caption = "Churn Rate Database - Overview of data") %>%
+  kable_styling(latex_options = c("striped", "hold_position"))
+```
+
+```{r}
+summary_table <- customer_churn %>% 
+  summarize( average_churn_score = mean(Churn.Score),
+            min_churn_score = min(Churn.Score),
+            max_churn_score = max(Churn.Score),
+            average_CLTV = mean(CLTV),
+            min_CLTV = min(CLTV),
+            max_CLTV = max(CLTV)
+)
+
+
+kable(summary_table) %>%
+  kable_styling(latex_options = c("striped", "hold_position"))
+```
