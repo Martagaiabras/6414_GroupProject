@@ -1,0 +1,23 @@
+---
+title: "6414 Group Project - Telecom Customer Churn Modeling "
+author: "Jared Babcock, Rishi Bubna, Marta Bras"
+date: "`r Sys.Date()`"
+output:  
+    pdf_document:
+    fig_width: 6
+    fig_height: 3  
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Reading Data
+customer_churn <- read.csv("Telco_customer_churn.csv")
+```
+
+# Explanatory Data Analysis
+
