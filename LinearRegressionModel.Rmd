@@ -1,0 +1,113 @@
+---
+title: "LinearRegressionModel"
+author: "Jared Babcock"
+date: "11/11/2019"
+output: html_document
+---
+
+Load data
+
+```{r}
+library(readxl)
+dat <- read_excel('Telco_customer_churn.xlsx')
+dat <- as.data.frame(dat)
+```
+
+Convert necessary columns to factors
+
+```{r}
+dat$City <- as.factor(dat$City)
+dat$`Zip Code` <- as.factor(dat$`Zip Code`)
+dat$`Churn Reason` <- as.factor(dat$`Churn Reason`)
+
+dat$Gender <- as.factor(dat$Gender)
+dat$`Senior Citizen` <- as.factor(dat$`Senior Citizen`)
+dat$Dependents <- as.factor(dat$Dependents)
+dat$`Phone Service` <- as.factor(dat$`Phone Service`)
+dat$`Multiple Lines` <- as.factor(dat$`Multiple Lines`)
+dat$`Internet Service` <- as.factor(dat$`Internet Service`)
+dat$`Online Security` <- as.factor(dat$`Online Security`)
+dat$`Online Backup` <- as.factor(dat$`Online Backup`)
+dat$`Device Protection` <- as.factor(dat$`Device Protection`)
+dat$`Tech Support` <- as.factor(dat$`Tech Support`)
+dat$`Streaming Movies` <- as.factor(dat$`Streaming Movies`)
+dat$`Streaming TV` <- as.factor(dat$`Streaming TV`)
+dat$Contract <- as.factor(dat$Contract)
+dat$`Paperless Billing` <- as.factor(dat$`Paperless Billing`)
+dat$`Payment Method` <- as.factor(dat$`Payment Method`)
+dat$Partner <- as.factor(dat$Partner)
+```
+
+We want to find the largest contributing factors to customer churn score (churn score is our response)
+
+Get rid of city, zip code, lat long, latitude, and longitude for now since there are too many factors
+
+Some cities are important to predicting churn score (based on city p-value) but not all of them
+
+There are 11 columns where total charges is na, since that is a small subset of the data (0.156%) we drop those,
+it is not worth imputing and possibly adding of data
+
+```{r}
+
+drops <- c(
+  "CustomerID",
+  "Count",
+  "Country",
+  "State",
+  "Churn Label",
+  "Churn Value",
+  "CLTV",
+  "Churn Reason",
+  "City",
+  "Zip Code",
+  "Lat Long",
+  "Latitude",
+  "Longitude"
+)
+
+
+dat.reduced <- dat[ , !(names(dat) %in% drops)]
+
+nas <- dat.reduced[rowSums(is.na(dat.reduced)) > 0,]
+
+View(nas)
+
+dat.reduced  <- na.omit(dat.reduced)
+
+View(dat.reduced)
+
+print(11/7043)
+```
+some sources:
+https://stackoverflow.com/questions/7980622/subset-of-rows-containing-na-missing-values-in-a-chosen-column-of-a-data-frame
+https://stackoverflow.com/questions/4605206/drop-data-frame-columns-by-name
+
+Create full model
+
+```{r}
+
+model.lm <- lm(`Churn Score`~.,data=dat.reduced)
+summary(model.lm)
+```
+
+Use forward stepwise regression for model selection
+
+```{r}
+full <- lm(`Churn Score`~.,data=dat.reduced)
+minimum <- lm(`Churn Score`~`Tenure Months`,data=dat.reduced)
+step(minimum, scope = list(lower=minimum, upper = full), direction = "forward")
+```
+
+Create reduced model
+
+```{r}
+model.reduced <- lm(formula = `Churn Score` ~ `Tenure Months` + `Internet Service` + 
+    Dependents + Contract + `Online Security` + `Payment Method` + 
+    `Multiple Lines` + `Total Charges` + `Streaming Movies` + 
+    `Paperless Billing` + `Streaming TV` + `Tech Support` + `Device Protection`, 
+    data = dat.reduced)
+summary(model.reduced)
+```
+
+From the reduced model, we see the following 7 factors are significant at <0.001 significance value:
+Internet Service: Fiber Optic, Internet Service: No, Dependents, Contract: 1 year, Multiple Lines: Yes, Total Charges, Streaming Movies: Yes
