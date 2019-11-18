@@ -5,3 +5,6 @@ Is this the correct order for model selection:
   3. Make the necessary transformations 
   4. Compare the efficiency measures for the models that have a good fit
   
+B) Imbalanced Data
+While making a classification model (using logistic regression), how do we account for imbalance in our dataset - such that our model is not skewed towards the majority class?
+- We are 5174 observations where customer churn is False, and only 1869 observations where customer churn in True. 
