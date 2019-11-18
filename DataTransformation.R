@@ -87,7 +87,8 @@ drops <- c(
   "Zip Code",
   "Lat Long",
   "Latitude",
-  "Longitude"
+  "Longitude",
+  "Churn Score"
 )
 
 dat.reduced_2 <- dat[ , !(names(dat) %in% drops)]

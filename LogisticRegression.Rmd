@@ -12,8 +12,53 @@ source("DataTransformation.R")
 ```
 
 
+
+
+# Full model
 ```{r}
-model <- glm(`Churn Value` ~., family = "binomial", data = dat.reduced_2)
-summary(model)
+full.model <- glm(`Churn Value` ~., family = "binomial", data = dat.reduced_2)
+summary(full.model)
+```
+
+# Step model
+```{r}
+#both directions step model
+step.model <- stepAIC(full.model, trace=0)
+step.model$anova
+```
+
+# Lasso model
+```{r}
+#converting data to dataframe and scaling
+
+data.matrix <- as.matrix(dat.reduced_2)
+x <- model.matrix( ~ ., dat.reduced_2)
+
+predictors <- x[,1:length(dat.reduced_2)-1]
+response <-  x[,length(dat.reduced_2)]
+
+
+#Using cross validation for the Lasso regression
+model_lasso <- cv.glmnet(predictors, response, alpha = 1,  family = "binomial")
+
+#Finding optimal value of lambda that minimizes cross-validation errors
+plot(model_lasso)
+
+coef(model_lasso, model_lasso$lambda.1se)
+```
+# Elastic model
+
+```{r}
+elastic_result <- cv.glmnet(predictors,
+                        response,
+                        alpha = 0.8,
+                        nfolds=5,
+                        type.measure="mse",
+                        family="binomial",
+                        standardize=FALSE)
+
+coef(elastic_result, s = elastic_result$lambda.min)
+
+summary(elastic_result)
 ```
 
