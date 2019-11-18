@@ -15,10 +15,6 @@ knitr::opts_chunk$set(echo = FALSE)
 source("LoadingData.R")
 ```
 
-```{r}
-#Reading Data
-customer_churn <- read.csv("Telco_customer_churn.csv")
-```
 
 # Explanatory Data Analysis
 
@@ -27,7 +23,7 @@ customer_churn <- read.csv("Telco_customer_churn.csv")
 The database has data from 7,043 telecom customers, all located in California (USA).
 
 ```{r}
-summary_table <- customer_churn %>% 
+summary_table <- dat %>% 
   summarize(n_observations = length(CustomerID),
             average_tenure_months = (mean(Tenure.Months)),
             min_tenure_months = min(Tenure.Months),
@@ -51,7 +47,7 @@ kable(summary_table, digits =2,  caption = "Churn Rate Database - Overview of da
 ## Distribution of the data
 
 ```{r, fig.height=5}
-ggplot(customer_churn, aes(x=Churn.Score)) + 
+ggplot(dat, aes(x=Churn.Score)) + 
   geom_histogram(binwidth = 5, fill = "grey") +
   ggtitle("Histogram of b_nuclei - Median imputation") +
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
@@ -61,28 +57,28 @@ ggplot(customer_churn, aes(x=Churn.Score)) +
 
 
 ```{r, fig.height=4}
-ggplot_1 <- ggplot(customer_churn, aes(y=Churn.Score, x= Gender, color = Gender,  palette = "jco")) +
+ggplot_1 <- ggplot(dat, aes(y=Churn.Score, x= Gender, color = Gender,  palette = "jco")) +
   geom_boxplot() +
   ggtitle("Boxplot of Gender") +
   theme_bw() + 
   theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(),  axis.title.x =element_text(size=8),  axis.title.y = element_text(size=8)) +
   theme(plot.title = element_text(size=8)) 
 
-ggplot_2 <- ggplot(customer_churn, aes(y=Churn.Score, x= Senior.Citizen, color = Senior.Citizen,  palette = "jco")) +
+ggplot_2 <- ggplot(dat, aes(y=Churn.Score, x= Senior.Citizen, color = Senior.Citizen,  palette = "jco")) +
   geom_boxplot() +
   ggtitle("Boxplot of seniority") +
   theme_bw() + 
   theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(),  axis.title.x =element_text(size=8),  axis.title.y = element_text(size=8)) +
   theme(plot.title = element_text(size=8)) 
 
-ggplot_3 <- ggplot(customer_churn, aes(y=Churn.Score, x= Dependents, color = Dependents ,  palette = "jco")) +
+ggplot_3 <- ggplot(dat, aes(y=Churn.Score, x= Dependents, color = Dependents ,  palette = "jco")) +
   geom_boxplot() +
   ggtitle("Boxplot of dependents") +
   theme_bw() + 
   theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(),  axis.title.x =element_text(size=8),  axis.title.y = element_text(size=8)) +
   theme(plot.title = element_text(size=8)) 
 
-ggplot_4 <- ggplot(customer_churn, aes(y=Churn.Score, x=Phone.Service, color =Phone.Service,  palette = "jco")) +
+ggplot_4 <- ggplot(dat, aes(y=Churn.Score, x=Phone.Service, color =Phone.Service,  palette = "jco")) +
   geom_boxplot() +
   ggtitle("Boxplot of phone service") +
   theme_bw() + 

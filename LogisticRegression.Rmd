@@ -1,0 +1,19 @@
+---
+title: "Logistic regression"
+author: "Marta Bras"
+date: "11/17/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+source("LoadingData.R")
+source("DataTransformation.R")
+```
+
+
+```{r}
+model <- glm(`Churn Value` ~., family = "binomial", data = dat.reduced_2)
+summary(model)
+```
+

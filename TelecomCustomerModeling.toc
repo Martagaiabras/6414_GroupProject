@@ -1,0 +1,3 @@
+\contentsline {section}{Explanatory Data Analysis}{1}{section*.2}% 
+\contentsline {subsection}{Overview of the data}{1}{section*.3}% 
+\contentsline {subsection}{Distribution of the data}{2}{section*.4}% 

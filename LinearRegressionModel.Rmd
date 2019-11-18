@@ -5,38 +5,13 @@ date: "11/11/2019"
 output: html_document
 ---
 
-Load data
 
-```{r}
-library(readxl)
-dat <- read_excel('Telco_customer_churn.xlsx')
-dat <- as.data.frame(dat)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+source("LoadingData.R")
+source("DataTransformation.R")
 ```
 
-Convert necessary columns to factors
-
-```{r}
-dat$City <- as.factor(dat$City)
-dat$`Zip Code` <- as.factor(dat$`Zip Code`)
-dat$`Churn Reason` <- as.factor(dat$`Churn Reason`)
-
-dat$Gender <- as.factor(dat$Gender)
-dat$`Senior Citizen` <- as.factor(dat$`Senior Citizen`)
-dat$Dependents <- as.factor(dat$Dependents)
-dat$`Phone Service` <- as.factor(dat$`Phone Service`)
-dat$`Multiple Lines` <- as.factor(dat$`Multiple Lines`)
-dat$`Internet Service` <- as.factor(dat$`Internet Service`)
-dat$`Online Security` <- as.factor(dat$`Online Security`)
-dat$`Online Backup` <- as.factor(dat$`Online Backup`)
-dat$`Device Protection` <- as.factor(dat$`Device Protection`)
-dat$`Tech Support` <- as.factor(dat$`Tech Support`)
-dat$`Streaming Movies` <- as.factor(dat$`Streaming Movies`)
-dat$`Streaming TV` <- as.factor(dat$`Streaming TV`)
-dat$Contract <- as.factor(dat$Contract)
-dat$`Paperless Billing` <- as.factor(dat$`Paperless Billing`)
-dat$`Payment Method` <- as.factor(dat$`Payment Method`)
-dat$Partner <- as.factor(dat$Partner)
-```
 
 We want to find the largest contributing factors to customer churn score (churn score is our response)
 
@@ -47,37 +22,7 @@ Some cities are important to predicting churn score (based on city p-value) but 
 There are 20 rows where total charges is na, since that is a small subset of the data (0.284%) we drop those,
 it is not worth imputing and possibly adding of data
 
-```{r}
 
-drops <- c(
-  "CustomerID",
-  "Count",
-  "Country",
-  "State",
-  "Churn Label",
-  "Churn Value",
-  "CLTV",
-  "Churn Reason",
-  "City",
-  "Zip Code",
-  "Lat Long",
-  "Latitude",
-  "Longitude"
-)
-
-
-dat.reduced <- dat[ , !(names(dat) %in% drops)]
-
-nas <- dat.reduced[rowSums(is.na(dat.reduced)) > 0,]
-
-dim(nas)
-
-dat.reduced  <- na.omit(dat.reduced)
-
-dim(dat.reduced)
-
-print(20/7032)
-```
 some sources:
 https://stackoverflow.com/questions/7980622/subset-of-rows-containing-na-missing-values-in-a-chosen-column-of-a-data-frame
 https://stackoverflow.com/questions/4605206/drop-data-frame-columns-by-name
@@ -85,7 +30,6 @@ https://stackoverflow.com/questions/4605206/drop-data-frame-columns-by-name
 Create full model
 
 ```{r}
-
 model.full <- lm(`Churn Score`~.,data=dat.reduced)
 summary(model.full)
 ```
@@ -126,8 +70,8 @@ We can see from this ANOVA that the full model is statistically significantly be
 
 ```{r}
 summary(model.full)
-```
 levels(dat.nooutliers$`Multiple Lines`)
+```
 We can see NAs present in our model summary, which indicates multicollinearity. First we will make sure that categorical variables are coded correctly. We will combine 'No' and 'No service' for multiple variables since it appears they are collinear.
 
 ```{r}
@@ -175,7 +119,6 @@ summary(model.full)
 Now evaluate VIF to see if we have to remove any other collinear variables.
 
 ```{r}
-library(car)
 
 vif.threshold <- 1 / (1 - summary(model.full)$r.squared)
 
