@@ -7,4 +7,4 @@ Is this the correct order for model selection:
   
 B) Imbalanced Data
 While making a classification model (using logistic regression), how do we account for imbalance in our dataset - such that our model is not skewed towards the majority class?
-- We are 5174 observations where customer churn is False, and only 1869 observations where customer churn in True. 
+- We have 5174 observations where customer churn is False, and only 1869 observations where customer churn in True. 
