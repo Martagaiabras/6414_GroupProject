@@ -1,0 +1,7 @@
+A) Model Selection
+Is this the correct order for model selection:
+  1. Build the full model, ridge regression model and variable selection models (lasso, stepwise and elastic net)
+  2. Evaluate the model fit
+  3. Make the necessary transformations 
+  4. Compare the efficiency measures for the models that have a good fit
+  
