@@ -5,6 +5,13 @@ Is this the correct order for model selection:
   3. Make the necessary transformations 
   4. Compare the efficiency measures for the models that have a good fit
   
+Do we remove outliers before doing any model selection/goodness of fit testing?
+  
 B) Imbalanced Data
 While making a classification model (using logistic regression), how do we account for imbalance in our dataset - such that our model is not skewed towards the majority class?
 - We have 5174 observations where customer churn is False, and only 1869 observations where customer churn in True. 
+
+C) Goodness of Fit
+Is there an equivalent to evaluating the Linearity assumption for Categorical variables?
+
+D) What do we do if our models violate the assumptions and are not a good fit? Are the models still somewhat valuable or do we have to throw them out?
