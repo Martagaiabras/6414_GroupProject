@@ -3,7 +3,8 @@ Is this the correct order for model selection:
   1. Build the full model, ridge regression model and variable selection models (lasso, stepwise and elastic net)
   2. Evaluate the model fit
   3. Make the necessary transformations 
-  4. Compare the efficiency measures for the models that have a good fit
+  4. Run the models again
+  5. Compare the efficiency measures for the models that have a good fit
   
 Do we remove outliers before doing any model selection/goodness of fit testing?
   
@@ -15,3 +16,4 @@ C) Goodness of Fit
 Is there an equivalent to evaluating the Linearity assumption for Categorical variables?
 
 D) What do we do if our models violate the assumptions and are not a good fit? Are the models still somewhat valuable or do we have to throw them out?
+
