@@ -12,10 +12,9 @@ source("LoadingData.R")
 source("DataTransformation.R")
 ```
 
-
 We want to find the largest contributing factors to customer churn score (churn score is our response)
 
-Get rid of city, zip code, lat long, latitude, and longitude for now since there are too many factors
+Get rid of city, zip code, lat long, latitude, and longitude for now since there are too many factors (possibly add back later)
 
 Some cities are important to predicting churn score (based on city p-value) but not all of them
 
@@ -126,16 +125,37 @@ cutoff.val <- max(10,vif.threshold)
 cutoff.val
 ```
 
-The variables that have adjusted GVIF > 10 (GVIF^(1/(2*df))) exhibit collinearity and should be removed. Looking at the output below, we want to remove the variable Monthly Charges since it has a high adjusted VIF.
-TODO: do we want GVIF or adjusted GVIF
+The variables that have GVIF > 10 exhibit multicollinearity and should be investigated.
+
 ```{r}
 vif(model.full)
 ```
+
+Looking at the above output, we will first remove Monthly Charges since it has a GVIF value significantly higher than the others.
 
 ```{r}
 # Monthly charges is in column 18, so remove that from the data
 
 dat.nooutliers.reduced <- dat.nooutliers[,-18]
+```
+
+```{r}
+model.no.collinearity <- lm(`Churn Score`~.,data=dat.nooutliers.reduced)
+vif(model.no.collinearity)
+```
+
+We see that removing Monthly Charges lowered the GVIF for most other variables. For now, we will keep Total Charges since it seems relevant and its GVIF is not very high above our rule of thumb threshold (and we do not always follow rules of thumb).
+
+```{r}
+sapply(dat.nooutliers.reduced,class)
+```
+
+We need to scale the numeric columns before model selection: Tenure Months, Total Charges, and the response (Churn Score).
+
+```{r}
+dat.nooutliers.reduced$`Tenure Months` <- scale(dat.nooutliers.reduced$`Tenure Months`)
+dat.nooutliers.reduced$`Total Charges` <- scale(dat.nooutliers.reduced$`Total Charges`)
+dat.nooutliers.reduced$`Churn Score` <- scale(dat.nooutliers.reduced$`Churn Score`)
 ```
 
 Use forward stepwise regression for model selection
@@ -154,8 +174,39 @@ model.reduced <- lm(formula = `Churn Score` ~ Contract + `Internet Service` +
     `Streaming TV` + `Payment Method` + `Senior Citizen` + `Paperless Billing` + 
     `Online Security` + Partner, data = dat.nooutliers.reduced)
 summary(model.reduced)
-View(dat.nooutliers.reduced)
 ```
 
 From the reduced model, we see the following predictors are significant at <0.001 significance value:
 Contract, Internet Service, Total Charges, Dependents, Streaming Movies and Multiple Lines.
+
+Now we want to check the goodness of fit of this model.
+
+```{r}
+resids.standard <- rstandard(model.reduced)
+hist(resids.standard)
+```
+
+We see from this histogram that the standardized residuals are approximately normally distributed, with a slight skew to the left side.
+
+```{r}
+qqnorm(resids.standard)
+qqline(resids.standard)
+```
+
+The QQ plot makes it appear that the model violates the Normality assumption; we have strong tails on both ends.
+
+```{r}
+fit.vals <- fitted.values(model.reduced)
+plot(fit.vals,resids.standard)
+```
+
+We see from this plot that the Constant Variance assumption also appears to be violated, since the standardized residuals seem to trend downwards as the fitted values increase. However, the Independence assumption seems to hold because we do not see separate clusters on this plot of standardized residuals vs fitted values.
+
+```{r}
+par(mfrow=c(1,2))
+
+plot(dat.nooutliers.reduced$`Tenure Months`,dat.nooutliers.reduced$`Churn Score`)
+plot(dat.nooutliers.reduced$`Total Charges`,dat.nooutliers.reduced$`Churn Score`)
+```
+
+We then test the Linearity of the quantitative predictors against the response. For both Tenure Months and Total Charges, we see a very dispersed relationship between each predictor and the response, indicating that the Linearity assumption does not hold.

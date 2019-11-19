@@ -38,7 +38,7 @@ dat$`Paperless Billing` <- as.factor(dat$`Paperless Billing`)
 #levels(dat$`Paperless Billing`)
 dat$`Payment Method` <- as.factor(dat$`Payment Method`)
 #levels(dat$`Payment Method`)
-
+dat$Partner <- as.factor(dat$Partner)
 
 ## 2. Dropping unecessary columns - Linear regression
 drops <- c(
