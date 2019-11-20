@@ -2,14 +2,10 @@
 title: '6414 Group Project - Telecom Customer Churn Modeling '
 author: "Jared Babcock, Rishi Bubna, Marta Bras"
 date: "`r Sys.Date()`"
-output:
-  html_document:
-    df_print: paged
-    toc: yes
-    toc_depth: '2'
+output:  
   pdf_document:
-    toc: yes
-    toc_depth: 2
+    toc: true
+    number_sections: true
 ---
 
 ```{r setup, include=FALSE}
