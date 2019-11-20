@@ -1,11 +1,15 @@
 ---
-title: "6414 Group Project - Telecom Customer Churn Modeling "
+title: '6414 Group Project - Telecom Customer Churn Modeling '
 author: "Jared Babcock, Rishi Bubna, Marta Bras"
 date: "`r Sys.Date()`"
-output:  
-    pdf_document:
-      toc: true
-      toc_depth: 2
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '2'
+  pdf_document:
+    toc: yes
+    toc_depth: 2
 ---
 
 ```{r setup, include=FALSE}
@@ -18,7 +22,21 @@ source("CSS.R")
 
 Customer churn (or customer attrition) analysis is one of the vital measures for subscription-based business models such as telecom services, internet providers. This is more important in business sectors that have high competition. Companies can choose to increase engagement with customers that are expected to churn to retain them, which would lead the company to increase revenue.
 
-## Data
+## Summary (goals and major findings)
+
+## Project goals
+
+1. Building a predictive model for churn rate that best identifies which customers are likely to churn.
+
+2. Building a predictive model for CLTV that best identifies how much a customer is worth for the company.
+
+3. Perform customer segmentation to identify high value customers that are likely to churn.
+
+## Reasons for our study
+
+## A Priori Expectations
+
+# Data
 
 The IBM Business Analytics Community provides a fictional dataset of over 7,000 customers for a telecom company that contains information about which customers have left, stayed, or signed up for their service. The dataset also contains major demographic information for customers, along with Satisfaction Score, Churn Score, and Customer Lifetime Value (CLTV) index.
 
@@ -46,7 +64,6 @@ kable(summary_table, digits = 0, format = "latex", booktabs = T, caption = "Demo
 ```
 
 
-
 ```{r fig.align = "center", fig.height=6}
 slices <- table(dat$`Churn Value`)
 lbls <- c("churned", "not churned")
@@ -58,23 +75,12 @@ pie(slices,labels = lbls, col=j_colors, cex.lab=0.5)
 
 ```
 
-
-
-## Project goals
-
-1. Building a predictive model for churn rate that best identifies which customers are likely to churn.
-
-2. Building a predictive model for CLTV that best identifies how much a customer is worth for the company.
-
-3. Perform customer segmentation to identify high value customers that are likely to churn.
-
-
 # Explanatory Data Analysis
 
 ```{r, fig.height=5}
 ggplot(dat, aes(x=`Churn Score`)) + 
   geom_histogram(binwidth = 5, fill = "grey") +
-  ggtitle("Histogram of b_nuclei - Median imputation") +
+  ggtitle("Histogram of Churn Score") +
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
   panel.grid.minor = element_blank()) +
   theme(plot.title = element_text(size=11))  
@@ -141,5 +147,6 @@ ggarrange(ggplot_1,ggplot_2, ggplot_3, ggplot_4, nrow = 2, ncol =2)
 
 
 # Conclusions
+# Subject Matter Implications
 # Limitations and next steps
 # Attachments
