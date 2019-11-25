@@ -72,7 +72,19 @@ dim(dat.reduced)
 print(20/7032)
 
 
+## 3. Adding a column with reason to churn 
 
+dat.reduced_2 <- dat.reduced  %>%  filter(`Churn Reason` != "NA" & `Churn Reason` != "Don't know") %>% 
+  mutate(Reason = case_when(
+    grepl("Price|Extra data charges|Long distance charges",`Churn Reason`) ~ "Price", 
+    grepl("Attitude|Service dissatisfaction|Poor expertise of phone support|Poor expertise of online support",`Churn Reason`) ~ "Customer service",
+    grepl("Competitor",`Churn Reason`) ~ "Competitors offer",
+    grepl("Network reliability|Product dissatisfaction|Lack of affordable download/upload speed|Lack of self-service on Website|Lack of affordable download/upload speed|Limited range of services",`Churn Reason`) ~ "Product features",                  
+    TRUE ~ "Other"
+  ))
+  
+  
+  
 ## 3. Dropping unecessary columns - Logistic regression
 
 drops <- c(
@@ -104,3 +116,5 @@ dat.reduced_2  <- na.omit(dat.reduced_2)
 dim(dat.reduced_2)
 
 print(20/7032)
+
+
