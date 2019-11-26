@@ -1,0 +1,6 @@
+Ideas of things to do:
+
+1. find classification of reason to churn
+2. find classification for the location
+3. Create EDA style plots for data after it is cleaned/outliers removed/NAs removed/etc (maybe we don't need to do this)
+4. Do prediction on the Linear regression model (train/test split) in addition to using it for explanation

@@ -1,0 +1,46 @@
+---
+title: "EDA"
+author: "Marta Bras"
+date: "11/25/2019"
+output: html_document
+---
+
+```{r setup}
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```
+
+```{r, include=FALSE}
+source("./Logistic Regression/DataTransformation.R")
+```
+
+# EDA
+
+```{r}
+tb_obgender = xtabs(~dat.reduced_2$`Churn Value`+dat.reduced_2$Gender)
+barplot(prop.table(tb_obgender),axes=T,space=0.3,
+        xlab="Proportion of Churn vs not churn",
+        horiz=T, col=c("blue","brown"),main="Churn by sex")
+
+tb_citizen = xtabs(~dat.reduced_2$`Churn Value`+dat.reduced_2$`Senior Citizen`)
+barplot(prop.table(tb_citizen),axes=T,space=0.3,
+        xlab="Proportion of Churn vs not churn",
+        horiz=T, col=c("blue","brown"),main="Churn by Citizenship")
+
+
+tb_Dependents = xtabs(~dat.reduced_2$`Churn Value`+ dat.reduced_2$Dependents)
+barplot(prop.table(tb_Dependents),axes=T,space=0.3,
+        xlab="Proportion of Churn vs not churn",
+        horiz=T, col=c("blue","brown"),main="Churn by dependents")
+```
+
+```{r}
+tb_ageedu = xtabs(~dat.reduced_C$Reason+dat.reduced_C$`Churn Value`)
+
+
+library(vcd)
+mosaicplot(tb_ageedu,xlab="Age Group",ylab="Education",color=TRUE,main="")
+
+```
+
