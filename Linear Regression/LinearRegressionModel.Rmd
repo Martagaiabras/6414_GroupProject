@@ -1,0 +1,215 @@
+---
+title: "LinearRegressionModel"
+author: "Jared Babcock"
+date: "11/11/2019"
+output: html_document
+---
+
+```{r setup}
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```
+
+```{r, include=FALSE}
+source("./Linear Regression/DataTransformationlinear.R")
+```
+
+We want to find the largest contributing factors to customer churn score (churn score is our response)
+
+Get rid of city, zip code, lat long, latitude, and longitude for now since there are too many factors (possibly add back later)
+
+Some cities are important to predicting churn score (based on city p-value) but not all of them
+
+There are 20 rows where total charges is na, since that is a small subset of the data (0.284%) we drop those,
+it is not worth imputing and possibly adding of data
+
+
+some sources:
+https://stackoverflow.com/questions/7980622/subset-of-rows-containing-na-missing-values-in-a-chosen-column-of-a-data-frame
+https://stackoverflow.com/questions/4605206/drop-data-frame-columns-by-name
+
+Create full model
+
+```{r}
+model.full <- lm(`Churn Score`~.,data=dat.reduced)
+summary(model.full)
+```
+
+```{r}
+cooks.distances <- cooks.distance(model.full)
+n <- dim(dat.reduced)[1]
+threshold <- 4/n
+
+plot(cooks.distances,type='h',ylab="Cook's Distances")
+abline(h=threshold,col='red')
+```
+
+We can see from this plot that we have several points with Cook's Distance above the 4/n threshold.
+
+```{r}
+above.indices <- cooks.distances[cooks.distances>threshold]
+
+num.outliers <- length(above.indices)
+
+num.outliers/n*100
+```
+
+2.79% of the data are outliers, so we will remove them.
+
+```{r}
+dat.nooutliers <- dat.reduced[cooks.distances<=threshold,]
+```
+
+```{r}
+model.full <- lm(`Churn Score`~.,data=dat.nooutliers)
+model.intercept.only <- lm(`Churn Score`~1,data=dat.nooutliers)
+
+anova(model.full,model.intercept.only)
+```
+
+We can see from this ANOVA that the full model is statistically significantly better than a model with no predictors and only an intercept. So, we can do variable selection next.
+
+```{r}
+summary(model.full)
+levels(dat.nooutliers$`Multiple Lines`)
+```
+We can see NAs present in our model summary, which indicates multicollinearity. First we will make sure that categorical variables are coded correctly. We will combine 'No' and 'No service' for multiple variables since it appears they are collinear.
+
+```{r}
+# Deal with Multiple Lines
+dat.nooutliers$`Multiple Lines`[dat.nooutliers$`Multiple Lines` == 'No phone service'] <- 'No'
+dat.nooutliers$`Multiple Lines` <- as.factor(dat.nooutliers$`Multiple Lines`)
+dat.nooutliers$`Multiple Lines` <- droplevels(dat.nooutliers$`Multiple Lines`)
+
+# Deal with Online Security
+dat.nooutliers$`Online Security`[dat.nooutliers$`Online Security` == 'No internet service'] <- 'No'
+dat.nooutliers$`Online Security` <- as.factor(dat.nooutliers$`Online Security`)
+dat.nooutliers$`Online Security` <- droplevels(dat.nooutliers$`Online Security`)
+
+# Deal with Online Backup
+dat.nooutliers$`Online Backup`[dat.nooutliers$`Online Backup` == 'No internet service'] <- 'No'
+dat.nooutliers$`Online Backup` <- as.factor(dat.nooutliers$`Online Backup`)
+dat.nooutliers$`Online Backup` <- droplevels(dat.nooutliers$`Online Backup`)
+
+# Deal with Device Protection
+dat.nooutliers$`Device Protection`[dat.nooutliers$`Device Protection` == 'No internet service'] <- 'No'
+dat.nooutliers$`Device Protection` <- as.factor(dat.nooutliers$`Device Protection`)
+dat.nooutliers$`Device Protection` <- droplevels(dat.nooutliers$`Device Protection`)
+
+# Deal with Tech Support
+dat.nooutliers$`Tech Support`[dat.nooutliers$`Tech Support` == 'No internet service'] <- 'No'
+dat.nooutliers$`Tech Support` <- as.factor(dat.nooutliers$`Tech Support`)
+dat.nooutliers$`Tech Support` <- droplevels(dat.nooutliers$`Tech Support`)
+
+# Deal with Streaming TV
+dat.nooutliers$`Streaming TV`[dat.nooutliers$`Streaming TV` == 'No internet service'] <- 'No'
+dat.nooutliers$`Streaming TV` <- as.factor(dat.nooutliers$`Streaming TV`)
+dat.nooutliers$`Streaming TV` <- droplevels(dat.nooutliers$`Streaming TV`)
+
+# Deal with Streaming Movies
+dat.nooutliers$`Streaming Movies`[dat.nooutliers$`Streaming Movies` == 'No internet service'] <- 'No'
+dat.nooutliers$`Streaming Movies` <- as.factor(dat.nooutliers$`Streaming Movies`)
+dat.nooutliers$`Streaming Movies` <- droplevels(dat.nooutliers$`Streaming Movies`)
+```
+
+```{r}
+model.full <- lm(`Churn Score`~.,data=dat.nooutliers)
+summary(model.full)
+```
+
+Now evaluate VIF to see if we have to remove any other collinear variables.
+
+```{r}
+
+vif.threshold <- 1 / (1 - summary(model.full)$r.squared)
+
+cutoff.val <- max(10,vif.threshold)
+cutoff.val
+```
+
+The variables that have GVIF > 10 exhibit multicollinearity and should be investigated.
+
+```{r}
+vif(model.full)
+```
+
+Looking at the above output, we will first remove Monthly Charges since it has a GVIF value significantly higher than the others.
+
+```{r}
+# Monthly charges is in column 18, so remove that from the data
+
+dat.nooutliers.reduced <- dat.nooutliers[,-18]
+```
+
+```{r}
+model.no.collinearity <- lm(`Churn Score`~.,data=dat.nooutliers.reduced)
+vif(model.no.collinearity)
+```
+
+We see that removing Monthly Charges lowered the GVIF for most other variables. For now, we will keep Total Charges since it seems relevant and its GVIF is not very high above our rule of thumb threshold (and we do not always follow rules of thumb).
+
+```{r}
+sapply(dat.nooutliers.reduced,class)
+```
+
+We need to scale the numeric columns before model selection: Tenure Months, Total Charges, and the response (Churn Score).
+
+```{r}
+dat.nooutliers.reduced$`Tenure Months` <- scale(dat.nooutliers.reduced$`Tenure Months`)
+dat.nooutliers.reduced$`Total Charges` <- scale(dat.nooutliers.reduced$`Total Charges`)
+dat.nooutliers.reduced$`Churn Score` <- scale(dat.nooutliers.reduced$`Churn Score`)
+```
+
+Use forward stepwise regression for model selection
+
+```{r}
+full <- lm(`Churn Score`~.,data=dat.nooutliers.reduced)
+minimum <- lm(`Churn Score`~1,data=dat.nooutliers.reduced)
+step(minimum, scope = list(lower=minimum, upper = full), direction = "forward")
+```
+
+Create reduced model
+
+```{r}
+model.reduced <- lm(formula = `Churn Score` ~ Contract + `Internet Service` + 
+    `Total Charges` + Dependents + `Streaming Movies` + `Multiple Lines` + 
+    `Streaming TV` + `Payment Method` + `Senior Citizen` + `Paperless Billing` + 
+    `Online Security` + Partner, data = dat.nooutliers.reduced)
+summary(model.reduced)
+```
+
+From the reduced model, we see the following predictors are significant at <0.001 significance value:
+Contract, Internet Service, Total Charges, Dependents, Streaming Movies and Multiple Lines.
+
+Now we want to check the goodness of fit of this model.
+
+```{r}
+resids.standard <- rstandard(model.reduced)
+hist(resids.standard)
+```
+
+We see from this histogram that the standardized residuals are approximately normally distributed, with a slight skew to the left side.
+
+```{r}
+qqnorm(resids.standard)
+qqline(resids.standard)
+```
+
+The QQ plot makes it appear that the model violates the Normality assumption; we have strong tails on both ends.
+
+```{r}
+fit.vals <- fitted.values(model.reduced)
+plot(fit.vals,resids.standard)
+```
+
+We see from this plot that the Constant Variance assumption also appears to be violated, since the standardized residuals seem to trend downwards as the fitted values increase. However, the Independence assumption seems to hold because we do not see separate clusters on this plot of standardized residuals vs fitted values.
+
+```{r}
+par(mfrow=c(1,2))
+
+plot(dat.nooutliers.reduced$`Tenure Months`,dat.nooutliers.reduced$`Churn Score`)
+plot(dat.nooutliers.reduced$`Total Charges`,dat.nooutliers.reduced$`Churn Score`)
+```
+
+We then test the Linearity of the quantitative predictors against the response. For both Tenure Months and Total Charges, we see a very dispersed relationship between each predictor and the response, indicating that the Linearity assumption does not hold.

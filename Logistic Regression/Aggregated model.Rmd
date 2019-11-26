@@ -1,0 +1,148 @@
+---
+title: "Aggregated model"
+author: "Marta Bras"
+date: "11/25/2019"
+output: html_document
+---
+```{r setup}
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```
+
+```{r, include=FALSE}
+source("./Logistic Regression/DataTransformation.R")
+```
+
+## Aggregating data 1
+
+```{r}
+dat.reduced_2$`Churn Value` = as.numeric(dat.reduced_2$`Churn Value`)
+
+
+obdata.agg.n = aggregate(`Churn Value`~ . , data = dat.reduced_2, FUN=length)
+
+
+obdata.agg.y = aggregate(`Churn Value`~ . , data = dat.reduced_2, FUN=sum)
+
+
+data <- cbind(obdata.agg.n, obdata.agg.y$`Churn Value`)
+
+data <- data %>% rename_at(19,~"Total")
+
+## Fitting the model
+
+model.agg = glm(cbind(`Churn Value`,Total-`Churn Value`)~ .,
+                data = data,family=binomial)
+
+## summary the model
+summary(model.agg)
+```
+
+
+
+## Goodness of fit 1
+
+```{r}
+## Test for overall regression
+gstat = model.agg$null.deviance - deviance(model.agg)
+cbind(gstat, 1-pchisq(gstat,length(coef(model.agg))-1))
+```
+
+
+```{r}
+## Test for GOF: Using deviance residuals
+deviances2 = residuals(model.agg,type="deviance")
+dev.tvalue = sum(deviances2^2)
+c(dev.tvalue, 1-pchisq(dev.tvalue,40))
+#OR
+c(deviance(model.agg), 1-pchisq(deviance(model.agg),40))
+
+## Residual Analysis
+res = resid(model.agg,type="deviance")
+par(mfrow=c(2,2))
+boxplot(res~Gender,xlab="Age Group",ylab = "Std residuals",data = data)
+boxplot(res~`Senior Citizen`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~Partner,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~Dependents,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Phone Service`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Multiple Lines`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Internet Service`,xlab="Gender",ylab = "Std residuals",data = data)
+
+
+
+qqnorm(res, ylab="Std residuals")
+qqline(res,col="blue",lwd=2)
+hist(res,10,xlab="Std residuals", main="")
+```
+
+
+# Removing outliers
+
+```{r}
+cooksd <- cooks.distance(model.agg)
+plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+
+abline(h = 4*mean(cooksd, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""), col="red")  # add labels
+```
+
+```{r}
+
+which(cook > 1)
+newdata = data[-2052,]
+```
+
+
+
+# Aggregating data 2
+
+```{r}
+model.agg_2 = glm(cbind(`Churn Value`,Total-`Churn Value`)~ .,
+                data = newdata,family=binomial)
+summary(model.agg_2)
+
+```
+
+
+
+
+## Goodness of fit 2
+
+```{r}
+## Test for overall regression
+gstat = model.agg_2$null.deviance - deviance(model.agg_2)
+cbind(gstat, 1-pchisq(gstat,length(coef(model.agg_2))-1))
+```
+
+
+```{r}
+## Test for GOF: Using deviance residuals
+deviances2 = residuals(model.agg_2,type="deviance")
+dev.tvalue = sum(deviances2^2)
+c(dev.tvalue, 1-pchisq(dev.tvalue,40))
+#OR
+c(deviance(model.agg_2), 1-pchisq(deviance(model.agg_2),40))
+
+## Residual Analysis
+res = resid(model.agg_2,type="deviance")
+par(mfrow=c(2,2))
+boxplot(res~Gender,xlab="Age Group",ylab = "Std residuals",data = data)
+boxplot(res~`Senior Citizen`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~Partner,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~Dependents,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Phone Service`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Multiple Lines`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Internet Service`,xlab="Gender",ylab = "Std residuals",data = data)
+
+
+
+qqnorm(res, ylab="Std residuals")
+qqline(res,col="blue",lwd=2)
+hist(res,10,xlab="Std residuals", main="")
+```
+
+
+
+
+
