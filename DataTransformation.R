@@ -1,5 +1,7 @@
 source("LoadingData.R")
 
+## A. General Transformations
+
 ## 1. Transforming variables to factors
 
 dat$City <- as.factor(dat$City)
@@ -39,8 +41,23 @@ dat$`Paperless Billing` <- as.factor(dat$`Paperless Billing`)
 dat$`Payment Method` <- as.factor(dat$`Payment Method`)
 #levels(dat$`Payment Method`)
 dat$Partner <- as.factor(dat$Partner)
+#levels(dat$`Payment Method`)
+dat$`Churn Value` <- as.factor(dat$`Churn Value`)
 
-## 2. Dropping unecessary columns - Linear regression
+## 2. Adding a column with reason to churn 
+
+dat.reduced_C <- dat  %>%  filter(`Churn Reason` != "NA" & `Churn Reason` != "Don't know") %>% 
+  mutate(Reason = case_when(
+    grepl("Price|Extra data charges|Long distance charges",`Churn Reason`) ~ "Price", 
+    grepl("Attitude|Service dissatisfaction|Poor expertise of phone support|Poor expertise of online support",`Churn Reason`) ~ "Customer service",
+    grepl("Competitor",`Churn Reason`) ~ "Competitors offer",
+    grepl("Network reliability|Product dissatisfaction|Lack of affordable download/upload speed|Lack of self-service on Website|Lack of affordable download/upload speed|Limited range of services",`Churn Reason`) ~ "Product features",                  
+    TRUE ~ "Other"
+  ))
+  
+  
+## B. Transformations for linear
+## 1. Dropping unecessary columns 
 drops <- c(
   "CustomerID",
   "Count",
@@ -59,7 +76,7 @@ drops <- c(
 
 dat.reduced <- dat[ , !(names(dat) %in% drops)]
 
-## 2.1. Dropping NAs
+## 2. Dropping NAs
 
 nas <- dat.reduced[rowSums(is.na(dat.reduced)) > 0,]
 
@@ -85,7 +102,10 @@ dat.reduced_2 <- dat.reduced  %>%  filter(`Churn Reason` != "NA" & `Churn Reason
   
   
   
-## 3. Dropping unecessary columns - Logistic regression
+
+## C. Transformation for logistic   
+## 1. Dropping unecessary columns - Logistic regression
+
 
 drops <- c(
   "CustomerID",
@@ -100,12 +120,14 @@ drops <- c(
   "Lat Long",
   "Latitude",
   "Longitude",
-  "Churn Score"
+  "Churn Score",
+"Monthly Charges",
+"Total Charges"
 )
 
 dat.reduced_2 <- dat[ , !(names(dat) %in% drops)]
 
-## 2.1. Dropping NAs
+##2. Dropping NAs
 
 nas <- dat.reduced_2[rowSums(is.na(dat.reduced_2)) > 0,]
 
@@ -117,4 +139,30 @@ dim(dat.reduced_2)
 
 print(20/7032)
 
+#3. Creating buckets for Tenure months
+
+dat.reduced_2  %>%  summarize(
+  avg_tenure = mean(`Tenure Months`),
+  std = sd(`Tenure Months`),
+  max = max(`Tenure Months`),
+  min = min(`Tenure Months`)
+)
+
+
+dat.reduced_2 <- dat.reduced_2  %>%  
+  mutate(Tenure = case_when(
+    `Tenure Months` <= 6 ~ "lesst6",
+    `Tenure Months` > 6 & `Tenure Months` <=18  ~ "6to18",
+    `Tenure Months` > 18 & `Tenure Months` <= 30  ~ "18to30",
+    `Tenure Months` > 30  & `Tenure Months` <= 42 ~ "38to42",
+    `Tenure Months` > 42  & `Tenure Months` <= 54 ~ "42to54",
+    `Tenure Months` > 54 ~ "more54",
+  ))
+
+dat.reduced_2$Tenure
+
+#4. Removing tenure months continuous and adding factor
+
+dat.reduced_2 <- dat.reduced_2[-c(5)]
+dat.reduced_2$Tenure <- as.factor(dat.reduced_2$Tenure)
 
