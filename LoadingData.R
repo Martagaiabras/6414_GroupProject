@@ -13,7 +13,6 @@ require(faraway)
 library(aod)
 library(ggpubr)
 
-
 #importing data
 dat <- read_csv('Telco_customer_churn.csv')
 dat <- as_data_frame(dat)

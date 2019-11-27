@@ -44,10 +44,68 @@ dat$Partner <- as.factor(dat$Partner)
 #levels(dat$`Payment Method`)
 dat$`Churn Value` <- as.factor(dat$`Churn Value`)
 
+## 2. Adding a column with reason to churn 
 
+dat.reduced_C <- dat  %>%  filter(`Churn Reason` != "NA" & `Churn Reason` != "Don't know") %>% 
+  mutate(Reason = case_when(
+    grepl("Price|Extra data charges|Long distance charges",`Churn Reason`) ~ "Price", 
+    grepl("Attitude|Service dissatisfaction|Poor expertise of phone support|Poor expertise of online support",`Churn Reason`) ~ "Customer service",
+    grepl("Competitor",`Churn Reason`) ~ "Competitors offer",
+    grepl("Network reliability|Product dissatisfaction|Lack of affordable download/upload speed|Lack of self-service on Website|Lack of affordable download/upload speed|Limited range of services",`Churn Reason`) ~ "Product features",                  
+    TRUE ~ "Other"
+  ))
   
+  
+## B. Transformations for linear
+## 1. Dropping unecessary columns 
+drops <- c(
+  "CustomerID",
+  "Count",
+  "Country",
+  "State",
+  "Churn Label",
+  "Churn Value",
+  "CLTV",
+  "Churn Reason",
+  "City",
+  "Zip Code",
+  "Lat Long",
+  "Latitude",
+  "Longitude"
+)
+
+dat.reduced <- dat[ , !(names(dat) %in% drops)]
+
+## 2. Dropping NAs
+
+nas <- dat.reduced[rowSums(is.na(dat.reduced)) > 0,]
+
+dim(nas)
+
+dat.reduced  <- na.omit(dat.reduced)
+
+dim(dat.reduced)
+
+print(20/7032)
+
+
+## 3. Adding a column with reason to churn 
+
+dat.reduced_2 <- dat.reduced  %>%  filter(`Churn Reason` != "NA" & `Churn Reason` != "Don't know") %>% 
+  mutate(Reason = case_when(
+    grepl("Price|Extra data charges|Long distance charges",`Churn Reason`) ~ "Price", 
+    grepl("Attitude|Service dissatisfaction|Poor expertise of phone support|Poor expertise of online support",`Churn Reason`) ~ "Customer service",
+    grepl("Competitor",`Churn Reason`) ~ "Competitors offer",
+    grepl("Network reliability|Product dissatisfaction|Lack of affordable download/upload speed|Lack of self-service on Website|Lack of affordable download/upload speed|Limited range of services",`Churn Reason`) ~ "Product features",                  
+    TRUE ~ "Other"
+  ))
+  
+  
+  
+
 ## C. Transformation for logistic   
 ## 1. Dropping unecessary columns - Logistic regression
+
 
 drops <- c(
   "CustomerID",
@@ -91,36 +149,20 @@ dat.reduced_2  %>%  summarize(
 )
 
 
+dat.reduced_2 <- dat.reduced_2  %>%  
+  mutate(Tenure = case_when(
+    `Tenure Months` <= 6 ~ "lesst6",
+    `Tenure Months` > 6 & `Tenure Months` <=18  ~ "6to18",
+    `Tenure Months` > 18 & `Tenure Months` <= 30  ~ "18to30",
+    `Tenure Months` > 30  & `Tenure Months` <= 42 ~ "38to42",
+    `Tenure Months` > 42  & `Tenure Months` <= 54 ~ "42to54",
+    `Tenure Months` > 54 ~ "more54",
+  ))
 
-
-dat.reduced_2$Tenure <- cut(dat.reduced_2$`Tenure Months`, 5, labels = c("bin1", "bin2", "bin3", "bin4", "bin5"))
-
-
-
-
-
-# dat.reduced_2 <- dat.reduced_2  %>%  
-#   mutate(Tenure = case_when(
-#     `Tenure Months` <= 6 ~ "lesst6",
-#     `Tenure Months` > 6 & `Tenure Months` <=18  ~ "6to18",
-#     `Tenure Months` > 18 & `Tenure Months` <= 30  ~ "18to30",
-#     `Tenure Months` > 30  & `Tenure Months` <= 42 ~ "38to42",
-#     `Tenure Months` > 42  & `Tenure Months` <= 54 ~ "42to54",
-#     `Tenure Months` > 54 ~ "more54",
-#   ))
-
+dat.reduced_2$Tenure
 
 #4. Removing tenure months continuous and adding factor
 
 dat.reduced_2 <- dat.reduced_2[-c(5)]
 dat.reduced_2$Tenure <- as.factor(dat.reduced_2$Tenure)
-
-
-
-#Inclujding total charges as bin
-Charges <-  dat$`Total Charges`
-dat.reduced_3 <- cbind(dat.reduced_2, Charges)
-hist(Charges)
-
-dat.reduced_3$Charges <- cut(dat.reduced_3$Charges, 5, labels = c("bin1", "bin2", "bin3", "bin4", "bin5"))
 
