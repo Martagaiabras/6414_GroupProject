@@ -76,6 +76,7 @@ plot(model_lasso)
 
 coef(model_lasso, model_lasso$lambda.1se)
 ```
+
 # Elastic model
 
 ```{r}
