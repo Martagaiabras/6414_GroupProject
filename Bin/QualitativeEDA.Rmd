@@ -1,0 +1,78 @@
+---
+title: "QualitativeEDA"
+author: "Jared Babcock"
+date: "10/26/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+source("LoadingData.R")
+source("DataTransformation.R")
+```
+Country is always United States and State is always California.
+
+These are all of the qualitative predictors (I think Churn Label and Churn Value are part of the response)
+
+
+City and Zip code both have a ton of different classes, so maybe we should handle these differently (such as using only the most significant classes, not all of them)
+
+Churn reason also has many different classes, but only 20.
+
+
+
+Boxplots for the small qualitative variables vs churn score
+
+```{r}
+par(mfrow=c(2,4))
+boxplot(dat$`Churn Score`~dat$Gender)
+boxplot(dat$`Churn Score`~dat$`Senior Citizen`)
+boxplot(dat$`Churn Score`~dat$Dependents)
+boxplot(dat$`Churn Score`~dat$`Phone Service`)
+boxplot(dat$`Churn Score`~dat$`Multiple Lines`)
+boxplot(dat$`Churn Score`~dat$`Internet Service`)
+boxplot(dat$`Churn Score`~dat$`Online Security`)
+boxplot(dat$`Churn Score`~dat$`Online Backup`)
+```
+
+```{r}
+par(mfrow=c(2,3))
+boxplot(dat$`Churn Score`~dat$`Device Protection`)
+boxplot(dat$`Churn Score`~dat$`Tech Support`)
+boxplot(dat$`Churn Score`~dat$`Streaming Movies`)
+boxplot(dat$`Churn Score`~dat$`Streaming TV`)
+boxplot(dat$`Churn Score`~dat$Contract)
+boxplot(dat$`Churn Score`~dat$`Paperless Billing`)
+```
+
+```{r}
+boxplot(dat$`Churn Score`~dat$`Payment Method`)
+```
+
+Now, look at the same qualitative variables vs churn value (this produces different looking box charts since churn value is binary, it looks like for the most part people do not churn).
+
+```{r}
+par(mfrow=c(2,4))
+boxplot(dat$`Churn Value`~dat$Gender)
+boxplot(dat$`Churn Value`~dat$`Senior Citizen`)
+boxplot(dat$`Churn Value`~dat$Dependents)
+boxplot(dat$`Churn Value`~dat$`Phone Service`)
+boxplot(dat$`Churn Value`~dat$`Multiple Lines`)
+boxplot(dat$`Churn Value`~dat$`Internet Service`)
+boxplot(dat$`Churn Value`~dat$`Online Security`)
+boxplot(dat$`Churn Value`~dat$`Online Backup`)
+```
+
+```{r}
+par(mfrow=c(2,3))
+boxplot(dat$`Churn Value`~dat$`Device Protection`)
+boxplot(dat$`Churn Value`~dat$`Tech Support`)
+boxplot(dat$`Churn Value`~dat$`Streaming Movies`)
+boxplot(dat$`Churn Value`~dat$`Streaming TV`)
+boxplot(dat$`Churn Value`~dat$Contract)
+boxplot(dat$`Churn Value`~dat$`Paperless Billing`)
+```
+
+```{r}
+boxplot(dat$`Churn Value`~dat$`Payment Method`)
+```

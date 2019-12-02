@@ -1,0 +1,236 @@
+---
+title: "Logistic regression"
+author: "Marta Bras"
+date: "11/17/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+source("LoadingData.R")
+source("DataTransformation.R")
+
+```
+
+# EDA
+
+```{r}
+tb_obgender = xtabs(~dat.reduced_2$`Churn Value`+dat.reduced_2$Gender)
+barplot(prop.table(tb_obgender),axes=T,space=0.3,
+        xlab="Proportion of Churn vs not churn",
+        horiz=T, col=c("blue","brown"),main="Churn by sex")
+
+tb_citizen = xtabs(~dat.reduced_2$`Churn Value`+dat.reduced_2$`Senior Citizen`)
+barplot(prop.table(tb_citizen),axes=T,space=0.3,
+        xlab="Proportion of Churn vs not churn",
+        horiz=T, col=c("blue","brown"),main="Churn by Citizenship")
+
+
+tb_Dependents = xtabs(~dat.reduced_2$`Churn Value`+ dat.reduced_2$Dependents)
+barplot(prop.table(tb_Dependents),axes=T,space=0.3,
+        xlab="Proportion of Churn vs not churn",
+        horiz=T, col=c("blue","brown"),main="Churn by dependents")
+```
+
+```{r}
+tb_ageedu = xtabs(~dat.reduced_C$Reason+dat.reduced_C$`Churn Value`)
+
+
+library(vcd)
+mosaicplot(tb_ageedu,xlab="Age Group",ylab="Education",color=TRUE,main="")
+
+```
+
+# Full model
+
+```{r}
+full.model <- glm(`Churn Value` ~., family = "binomial", data = dat.reduced_2)
+summary(full.model)
+
+```
+
+
+## Coefficients
+
+```{r}
+coefficients <-  coef(full.model)
+
+kable(coefficients, digits =6,  caption = "Logistic regression model - Coefficients") %>%
+  kable_styling(latex_options = c("striped", "hold_position"))
+```
+
+
+## Model significance overall
+
+```{r}
+pc1 <- 8143.4-5628.0
+pc2 <-7031-7008
+
+#X2 test
+1-pchisq(pc1,pc2)
+```
+
+To see if model is significant overall we do $null deviance - residual deviance$ and we test for significance of this difference with a $X^2$ test for $df_{nulldeviance} - df_{residual_deviance}$. Since the result from the test is very close to 0, we reject the null hypothesis and we conclude the model is significant overall.
+
+
+## Aggregating data 
+```{r}
+dat.reduced_2$`Churn Value` = as.numeric(dat.reduced_2$`Churn Value`)
+
+
+obdata.agg.n = aggregate(`Churn Value`~ . , data = dat.reduced_2, FUN=length)
+
+
+obdata.agg.y = aggregate(`Churn Value`~ . , data = dat.reduced_2, FUN=sum)
+
+
+data <- cbind(obdata.agg.n, obdata.agg.y$`Churn Value`)
+
+data <- data %>% rename_at(19,~"Total")
+
+## Fitting the model
+
+model.agg = glm(cbind(`Churn Value`,Total-`Churn Value`)~ .,
+                data = data,family=binomial)
+
+## summary the model
+summary(model.agg)
+```
+
+
+
+## Goodness of fit
+
+```{r}
+## Test for overall regression
+gstat = model.agg$null.deviance - deviance(model.agg)
+cbind(gstat, 1-pchisq(gstat,length(coef(model.agg))-1))
+```
+
+
+```{r}
+## Test for GOF: Using deviance residuals
+deviances2 = residuals(model.agg,type="deviance")
+dev.tvalue = sum(deviances2^2)
+c(dev.tvalue, 1-pchisq(dev.tvalue,40))
+#OR
+c(deviance(model.agg), 1-pchisq(deviance(model.agg),40))
+
+## Residual Analysis
+res = resid(model.agg,type="deviance")
+par(mfrow=c(2,2))
+boxplot(res~Gender,xlab="Age Group",ylab = "Std residuals",data = data)
+boxplot(res~`Senior Citizen`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~Partner,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~Dependents,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Phone Service`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Multiple Lines`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Internet Service`,xlab="Gender",ylab = "Std residuals",data = data)
+
+
+
+qqnorm(res, ylab="Std residuals")
+qqline(res,col="blue",lwd=2)
+hist(res,10,xlab="Std residuals", main="")
+```
+
+
+```{r}
+cooksd <- cooks.distance(model.agg)
+plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+
+abline(h = 4*mean(cooksd, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""), col="red")  # add labels
+```
+
+```{r}
+which(cook > 1)
+
+newdata = data[-2052,]
+```
+
+```{r}
+
+```
+
+
+
+```{r}
+
+model.agg.3 = glm(cbind(`Churn Value`,Total-`Churn Value`)~ .,
+                data = data,family=binomial(link = cloglog))
+
+## Residual Analysis
+par(mfrow=c(2,2))
+res = resid(model.agg.3,type="deviance")
+par(mfrow=c(2,2))
+boxplot(res~Gender,xlab="Age Group",ylab = "Std residuals",data = data)
+boxplot(res~`Senior Citizen`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~Partner,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~Dependents,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Phone Service`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Multiple Lines`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Internet Service`,xlab="Gender",ylab = "Std residuals",data = data)
+
+
+
+qqnorm(res, ylab="Std residuals")
+qqline(res,col="blue",lwd=2)
+hist(res,10,xlab="Std residuals", main="")
+
+
+
+#pearson
+pearres2 = residuals(full.model,type="pearson")
+pearson.tvalue = sum(pearres2^2)
+c(pearson.tvalue, 1-pchisq(pearson.tvalue,7008))
+
+#deviance
+c(deviance(full.model), 1-pchisq(deviance(full.model),7008))
+```
+
+
+
+# Step model
+```{r}
+#both directions step model
+step.model <- stepAIC(full.model, trace=0)
+step.model$anova
+```
+
+
+# Lasso model
+```{r}
+#converting data to dataframe and scaling
+
+data.matrix <- as.matrix(dat.reduced_2)
+x <- model.matrix( ~ ., dat.reduced_2)
+
+predictors <- x[,1:length(dat.reduced_2)-1]
+response <-  x[,length(dat.reduced_2)]
+
+
+#Using cross validation for the Lasso regression
+model_lasso <- cv.glmnet(predictors, response, alpha = 1,  family = "binomial")
+
+#Finding optimal value of lambda that minimizes cross-validation errors
+plot(model_lasso)
+
+coef(model_lasso, model_lasso$lambda.1se)
+```
+# Elastic model
+
+```{r}
+elastic_result <- cv.glmnet(predictors,
+                        response,
+                        alpha = 0.8,
+                        nfolds=5,
+                        type.measure="mse",
+                        family="binomial",
+                        standardize=FALSE)
+
+coef(elastic_result, s = elastic_result$lambda.min)
+
+summary(elastic_result)
+```
+

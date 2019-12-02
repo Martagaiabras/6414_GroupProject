@@ -5,15 +5,10 @@ date: "11/25/2019"
 output: html_document
 ---
 
-```{r setup}
-  library(knitr)
-  opts_knit$set(root.dir=normalizePath('../'))
-  opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r, include=FALSE}
-source("./Clustering/DataTransformationClustering.R")
-```
 ## R Markdown
 
 ```{r}
@@ -24,6 +19,7 @@ library(ISLR) # for college dataset
 library(cluster) # for gower similarity and pam
 library(Rtsne) # for t-SNE plot
 library(ggplot2) # for visualization # clustering algorithms & visualization
+source("DataTransformation.R")
 ```
 
 ```{r}
