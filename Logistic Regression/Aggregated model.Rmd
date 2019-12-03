@@ -14,7 +14,9 @@ output: html_document
 source("./Logistic Regression/DataTransformation.R")
 ```
 
+
 # Aggregating data  - Aggregating by all categorical variables with tenure as categorical with bins defined on data transformation
+
 
 ```{r}
 dat.reduced_2$`Churn Value` = as.numeric(dat.reduced_2$`Churn Value`)
@@ -49,7 +51,7 @@ gstat = model.agg$null.deviance - deviance(model.agg)
 cbind(gstat, 1-pchisq(gstat,length(coef(model.agg))-1))
 ```
 
-The mdoel is not a good fit
+The mdoel is not a good fit.
 
 
 ```{r}
@@ -63,19 +65,29 @@ c(deviance(model.agg), 1-pchisq(deviance(model.agg),40))
 ## Residual Analysis
 res = resid(model.agg,type="deviance")
 par(mfrow=c(2,2))
-boxplot(res~Gender,xlab="Age Group",ylab = "Std residuals",data = data)
-boxplot(res~`Senior Citizen`,xlab="Gender",ylab = "Std residuals",data = data)
-boxplot(res~Partner,xlab="Gender",ylab = "Std residuals",data = data)
-boxplot(res~Dependents,xlab="Gender",ylab = "Std residuals",data = data)
-boxplot(res~`Phone Service`,xlab="Gender",ylab = "Std residuals",data = data)
-boxplot(res~`Multiple Lines`,xlab="Gender",ylab = "Std residuals",data = data)
-boxplot(res~`Internet Service`,xlab="Gender",ylab = "Std residuals",data = data)
-boxplot(res~Tenure,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~Gender,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Senior Citizen`,xlab="Senior citizen",ylab = "Std residuals",data = data)
+boxplot(res~Partner,xlab="Partner",ylab = "Std residuals",data = data)
+boxplot(res~Dependents,xlab="Dependents",ylab = "Std residuals",data = data)
+boxplot(res~`Phone Service`,xlab="Phone service",ylab = "Std residuals",data = data)
+boxplot(res~`Multiple Lines`,xlab="Multiple lines",ylab = "Std residuals",data = data)
+boxplot(res~`Internet Service`,xlab="Internet service",ylab = "Std residuals",data = data)
+boxplot(res~Tenure,xlab="Tenure",ylab = "Std residuals",data = data)
 
 
 qqnorm(res, ylab="Std residuals")
 qqline(res,col="blue",lwd=2)
 hist(res,10,xlab="Std residuals", main="")
+```
+
+It is not a good fit.  Dependents, internet service and tenure have an unequal distribution of residuals.
+
+```{r}
+#variable importance
+library(caret)
+library(pscl)
+caret::varImp(model.agg) 
+pscl::pR2(model.agg)["McFadden"]
 ```
 
 
@@ -95,6 +107,7 @@ text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T
 length(data$Gender)
 
 a = which(cook > 0.0007713074)
+
 newdata = data[-a,]
 ```
 
@@ -105,7 +118,7 @@ newdata = data[-a,]
 ```{r}
 model.agg_2 = glm(cbind(`Churn Value`,Total-`Churn Value`)~ .,
                 data = newdata,family=binomial)
-summary(model.agg_2)
+  summary(model.agg_2)
 
 ```
 
@@ -133,15 +146,14 @@ c(deviance(model.agg_2), 1-pchisq(deviance(model.agg_2),40))
 ## Residual Analysis
 res = resid(model.agg_2,type="deviance")
 par(mfrow=c(2,2))
-boxplot(res~Gender,xlab="Age Group",ylab = "Std residuals",data = newdata)
-boxplot(res~`Senior Citizen`,xlab="Gender",ylab = "Std residuals",data = newdata)
-boxplot(res~Partner,xlab="Gender",ylab = "Std residuals",data = newdata)
-boxplot(res~Dependents,xlab="Gender",ylab = "Std residuals",data = newdata)
-boxplot(res~`Phone Service`,xlab="Gender",ylab = "Std residuals",data = newdata)
-boxplot(res~`Multiple Lines`,xlab="Gender",ylab = "Std residuals",data = newdata)
-boxplot(res~`Internet Service`,xlab="Gender",ylab = "Std residuals",data = newdata)
-boxplot(res~Tenure,xlab="Gender",ylab = "Std residuals",data = newdata)
-
+boxplot(res~Gender,xlab="Gender",ylab = "Std residuals",data = newdata)
+boxplot(res~`Senior Citizen`,xlab="Senior citizen",ylab = "Std residuals",data = newdata)
+boxplot(res~Partner,xlab="Partner",ylab = "Std residuals",data = newdata)
+boxplot(res~Dependents,xlab="Dependents",ylab = "Std residuals",data = newdata)
+boxplot(res~`Phone Service`,xlab="Phone service",ylab = "Std residuals",data = newdata)
+boxplot(res~`Multiple Lines`,xlab="Multiple lines",ylab = "Std residuals",data = newdata)
+boxplot(res~`Internet Service`,xlab="Internet service",ylab = "Std residuals",data = newdata)
+boxplot(res~Tenure,xlab="Tenure",ylab = "Std residuals",data = newdata)
 
 qqnorm(res, ylab="Std residuals")
 qqline(res,col="blue",lwd=2)
@@ -154,7 +166,7 @@ Not normal and from the histograms we can see not a good fit.
 
 ```{r}
 #removing tenure
-drop <- c("Tenure", "Dependents", "`Multiple Lines`")
+drop <- c("Tenure", "`Internet Service`", "`Multiple Lines`")
 newdata_2 = newdata[,!(names(newdata) %in% drop)]
 
 ```
