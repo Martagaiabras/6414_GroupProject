@@ -1,0 +1,67 @@
+---
+title: "Decision_tree"
+author: "Rishi Bubna"
+date: "03/12/2019"
+output: html_document
+---
+
+```{r setup}
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```
+
+```{r, include=FALSE}
+source("./Logistic Regression/DataTransformation.R")
+```
+
+```{r}
+install.packages("tree")
+library(tree)
+library(tidyverse)
+
+```
+
+```{r}
+set.seed(1)
+names(dat.reduced_2)<-str_replace_all(names(dat.reduced_2), c(" " = "." ))
+
+decision_tree <- tree(Churn.Value~., data = dat.reduced_2)
+```
+
+```{r}
+plot(decision_tree)
+text(decision_tree)
+```
+
+```{r}
+decision_tree_cv <- cv.tree(decision_tree)
+plot(decision_tree_cv$size,decision_tree_cv$dev, type ='b')
+```
+
+```{r}
+decision_tree_pruned <- prune.tree(decision_tree, best = 4)
+plot(decision_tree_pruned)
+text(decision_tree_pruned)
+```
+
+```{r}
+
+
+for (threshold in seq(0,1,by=0.1)){
+  
+predicted_churn_score <- predict(decision_tree_pruned)
+predicted_churn_score <- predicted_churn_score[,2]
+
+predicted_churn_score[predicted_churn_score < threshold] = 0
+predicted_churn_score[predicted_churn_score >= threshold] = 1
+  
+
+count=0
+for (i in 1:length(predicted_churn_score)) {
+if(predicted_churn_score[i] == dat.reduced_2$Churn.Value[i]) count = count+1
+}
+accuracy=count/length(predicted_churn_score)
+print(accuracy)
+}
+```
