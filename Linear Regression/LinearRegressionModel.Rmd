@@ -2,20 +2,21 @@
 title: "LinearRegressionModel"
 author: "Jared Babcock"
 date: "11/11/2019"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-```{r setup}
-  library(knitr)
-  opts_knit$set(root.dir=normalizePath('../'))
-  opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+source("LoadingData.R")
+source("DataTransformation.R")
 ```
 
-```{r, include=FALSE}
-source("./Linear Regression/DataTransformationlinear.R")
-```
+## Initial data prep
 
-We want to find the largest contributing factors to customer churn score (churn score is our response)
+We want to find the largest contributing factors to customer lifetime value (CLTV is our response)
 
 Get rid of city, zip code, lat long, latitude, and longitude for now since there are too many factors (possibly add back later)
 
@@ -32,7 +33,7 @@ https://stackoverflow.com/questions/4605206/drop-data-frame-columns-by-name
 Create full model
 
 ```{r}
-model.full <- lm(`Churn Score`~.,data=dat.reduced)
+model.full <- lm(`CLTV`~.,data=dat.reduced)
 summary(model.full)
 ```
 
@@ -55,15 +56,15 @@ num.outliers <- length(above.indices)
 num.outliers/n*100
 ```
 
-2.79% of the data are outliers, so we will remove them.
+2.49% of the data are outliers, so we will remove them.
 
 ```{r}
 dat.nooutliers <- dat.reduced[cooks.distances<=threshold,]
 ```
 
 ```{r}
-model.full <- lm(`Churn Score`~.,data=dat.nooutliers)
-model.intercept.only <- lm(`Churn Score`~1,data=dat.nooutliers)
+model.full <- lm(`CLTV`~.,data=dat.nooutliers)
+model.intercept.only <- lm(`CLTV`~1,data=dat.nooutliers)
 
 anova(model.full,model.intercept.only)
 ```
@@ -114,7 +115,7 @@ dat.nooutliers$`Streaming Movies` <- droplevels(dat.nooutliers$`Streaming Movies
 ```
 
 ```{r}
-model.full <- lm(`Churn Score`~.,data=dat.nooutliers)
+model.full <- lm(`CLTV`~.,data=dat.nooutliers)
 summary(model.full)
 ```
 
@@ -143,7 +144,7 @@ dat.nooutliers.reduced <- dat.nooutliers[,-18]
 ```
 
 ```{r}
-model.no.collinearity <- lm(`Churn Score`~.,data=dat.nooutliers.reduced)
+model.no.collinearity <- lm(`CLTV`~.,data=dat.nooutliers.reduced)
 vif(model.no.collinearity)
 ```
 
@@ -153,36 +154,104 @@ We see that removing Monthly Charges lowered the GVIF for most other variables. 
 sapply(dat.nooutliers.reduced,class)
 ```
 
-We need to scale the numeric columns before model selection: Tenure Months, Total Charges, and the response (Churn Score).
+## Model selection
+
+Since we have so many predictors, it is not computationally feasible to do a full search for model selection
+
+We need to scale the numeric columns Tenure Months, Total Charges, and the response (Churn Score) before regularized regression, but the glmnet function handles scaling for us.
+
+First, use forward stepwise regression for model selection
 
 ```{r}
-dat.nooutliers.reduced$`Tenure Months` <- scale(dat.nooutliers.reduced$`Tenure Months`)
-dat.nooutliers.reduced$`Total Charges` <- scale(dat.nooutliers.reduced$`Total Charges`)
-dat.nooutliers.reduced$`Churn Score` <- scale(dat.nooutliers.reduced$`Churn Score`)
+full <- lm(`CLTV`~.,data=dat.nooutliers.reduced)
+minimum <- lm(`CLTV`~1,data=dat.nooutliers.reduced)
+step(minimum, scope = list(lower=minimum, upper = full), direction = "forward",trace=FALSE)
 ```
 
-Use forward stepwise regression for model selection
+Create reduced stepwise model
 
 ```{r}
-full <- lm(`Churn Score`~.,data=dat.nooutliers.reduced)
-minimum <- lm(`Churn Score`~1,data=dat.nooutliers.reduced)
-step(minimum, scope = list(lower=minimum, upper = full), direction = "forward")
-```
-
-Create reduced model
-
-```{r}
-model.reduced <- lm(formula = `Churn Score` ~ Contract + `Internet Service` + 
-    `Total Charges` + Dependents + `Streaming Movies` + `Multiple Lines` + 
-    `Streaming TV` + `Payment Method` + `Senior Citizen` + `Paperless Billing` + 
-    `Online Security` + Partner, data = dat.nooutliers.reduced)
+model.reduced <- lm(formula = CLTV ~ `Tenure Months` + `Total Charges` + `Device Protection` + 
+    `Internet Service` + `Streaming TV` + `Online Backup`, data = dat.nooutliers.reduced)
 summary(model.reduced)
 ```
 
-From the reduced model, we see the following predictors are significant at <0.001 significance value:
-Contract, Internet Service, Total Charges, Dependents, Streaming Movies and Multiple Lines.
 
-Now we want to check the goodness of fit of this model.
+We now want to try to use the lasso method for variable selection
+
+```{r}
+# Use model.matrix to create dummy variables for lasso but drop the first column (extra intercept column)
+preds <- model.matrix(as.formula(CLTV~.),data=dat.nooutliers.reduced)[,-1]
+
+lasso.cv <- cv.glmnet(preds,dat.nooutliers.reduced$CLTV,alpha=1,nfolds=10)
+lasso.lam <- lasso.cv$lambda.min 
+model.lasso <- glmnet(preds,dat.nooutliers.reduced$CLTV, alpha = 1, nlambda = 100)
+```
+
+Look at the coefficients corresponding to the best lambda value
+
+```{r}
+coef(model.lasso,s=lasso.lam)
+```
+
+According to lasso regression, we want to keep Tenure Months, Internet Service, Online Security, Device Protection, Streaming TV, Contract, Payment Method, and Total Charges. Stepwise regression only kept 6 variables but lasso kept 8 variables.
+
+```{r}
+model.reduced.lasso <- lm(CLTV~`Tenure Months` + `Internet Service` + `Online Security` + `Device Protection` + `Streaming TV` + Contract
+                          + `Payment Method` + `Total Charges`,data=dat.nooutliers.reduced)
+summary(model.reduced.lasso)
+```
+
+We will try elastic net next since it is another variable selection technique
+
+```{r}
+elnet.cv <- cv.glmnet(preds,dat.nooutliers.reduced$CLTV,alpha=0.5,nfolds=10)
+elnet.lam <- elnet.cv$lambda.min 
+model.elnet <- glmnet(preds,dat.nooutliers.reduced$CLTV, alpha = 0.5, nlambda = 100)
+```
+
+Use the variables and coefficients corresponding to the model with the best lambda value
+
+```{r}
+coef(model.elnet,s=elnet.lam)
+```
+
+We want to use all variables in the elnet model, but the adjusted coefficients from elastic net
+
+```{r}
+model.not.reduced.elnet <- lm(CLTV~.,data=dat.nooutliers.reduced)
+model.not.reduced.elnet$coefficients <- coef(model.elnet,s=elnet.lam)
+summary(model.not.reduced.elnet)
+```
+
+Compare adjusted r^2, Mallows CP, AIC, and BIC for full, stepwise, lasso, and elastic models
+
+```{r}
+library(CombMSC)
+n <- dim(dat.nooutliers.reduced)[1]
+model.comp<-rbind(
+  full=c(summary(model.no.collinearity)$adj.r.sq,Cp(model.no.collinearity,S2=summary(model.no.collinearity)$sigma^2),
+         AIC(model.no.collinearity,k=2),AIC(model.no.collinearity,k=log(n))), 
+  step=c(summary(model.reduced)$adj.r.sq,Cp(model.reduced,S2=summary(model.reduced)$sigma^2), AIC(model.reduced,k=2),
+          AIC(model.reduced,k=log(n))), 
+  lasso=c(summary(model.reduced.lasso)$adj.r.sq,Cp(model.reduced.lasso,S2=summary(model.reduced.lasso)$sigma^2), AIC(model.reduced.lasso,k=2),
+          AIC(model.reduced.lasso,k=log(n))),
+  elnet=c(summary(model.not.reduced.elnet)$adj.r.sq,Cp(model.not.reduced.elnet,S2=summary(model.not.reduced.elnet)$sigma^2),
+          AIC(model.not.reduced.elnet,k=2),AIC(model.not.reduced.elnet,k=log(n)))
+)
+colnames(model.comp) = c("adj.rsq","Cp","AIC","BIC")
+model.comp
+```
+
+The stepwise model has lowest Mallows CP, AIC, and BIC, and its adjusted R^2 is the highest of all of the models, so we select that one as our best model
+
+## Goodness of fit
+
+Now we want to evaluate the goodness of fit on this model
+
+```{r}
+plot(model.reduced)
+```
 
 ```{r}
 resids.standard <- rstandard(model.reduced)
@@ -191,25 +260,113 @@ hist(resids.standard)
 
 We see from this histogram that the standardized residuals are approximately normally distributed, with a slight skew to the left side.
 
-```{r}
-qqnorm(resids.standard)
-qqline(resids.standard)
-```
-
 The QQ plot makes it appear that the model violates the Normality assumption; we have strong tails on both ends.
-
-```{r}
-fit.vals <- fitted.values(model.reduced)
-plot(fit.vals,resids.standard)
-```
 
 We see from this plot that the Constant Variance assumption also appears to be violated, since the standardized residuals seem to trend downwards as the fitted values increase. However, the Independence assumption seems to hold because we do not see separate clusters on this plot of standardized residuals vs fitted values.
 
-```{r}
-par(mfrow=c(1,2))
+We then test the Linearity of the quantitative predictors against the response. For both Tenure Months and Total Charges, we see a very dispersed relationship between each predictor and the response, indicating that the Linearity assumption does not hold.
 
-plot(dat.nooutliers.reduced$`Tenure Months`,dat.nooutliers.reduced$`Churn Score`)
-plot(dat.nooutliers.reduced$`Total Charges`,dat.nooutliers.reduced$`Churn Score`)
+We want to try a log transformation now to try and make the model a better fit
+
+```{r}
+sapply(dat.nooutliers.reduced,class)
 ```
 
-We then test the Linearity of the quantitative predictors against the response. For both Tenure Months and Total Charges, we see a very dispersed relationship between each predictor and the response, indicating that the Linearity assumption does not hold.
+Do a log transformation on the numeric variables Tenure Months and Total Charges
+
+```{r}
+dat.nooutliers.reduced.logtransform <- dat.nooutliers.reduced
+dat.nooutliers.reduced.logtransform$`Tenure Months` <- log(dat.nooutliers.reduced.logtransform$`Tenure Months`)
+dat.nooutliers.reduced.logtransform$`Total Charges` <- log(dat.nooutliers.reduced.logtransform$`Total Charges`)
+
+model.logpreds <- lm(CLTV ~ `Tenure Months` + `Total Charges` + `Device Protection` + 
+    `Internet Service` + `Streaming TV` + `Online Backup`,data=dat.nooutliers.reduced.logtransform)
+summary(model.logpreds)
+```
+
+```{r}
+plot(model.logpreds)
+```
+
+```{r}
+resids.standard <- rstandard(model.logpreds)
+hist(resids.standard)
+```
+
+Still not a great fit with the log of predictors
+
+Now we will try taking the log of the response without log predictors
+
+```{r}
+model.logresponse <- lm(log(CLTV) ~ `Tenure Months` + `Total Charges` + `Device Protection` + 
+    `Internet Service` + `Streaming TV` + `Online Backup`,data=dat.nooutliers.reduced)
+summary(model.logresponse)
+```
+
+```{r}
+plot(model.logresponse)
+```
+
+
+```{r}
+resids.standard <- rstandard(model.logresponse)
+hist(resids.standard)
+```
+
+Bad normality when we transform response, slightly better linearity?
+
+Now we take the log of both predictors and and response
+
+```{r}
+model.both.transform <- lm(log(CLTV) ~ `Tenure Months` + `Total Charges` + `Device Protection` + 
+    `Internet Service` + `Streaming TV` + `Online Backup`,data=dat.nooutliers.reduced.logtransform)
+summary(model.both.transform)
+```
+
+```{r}
+plot(model.both.transform)
+```
+
+```{r}
+resids.standard <- rstandard(model.both.transform)
+hist(resids.standard)
+```
+
+Doing log transformation the response but not the predictors did slightly better in terms of linearity, so we will keep that transformation
+
+Now we want to use the box cox transformation to try and improve normality
+
+```{r}
+bc<- boxcox(model.logresponse)
+
+# Get lambda from the boxcox function
+bc.lam <- bc$x[which.max(bc$y)]
+
+# Then do a power transformation using that lambda
+dat.nooutliers.reduced$CLTV <- (dat.nooutliers.reduced$CLTV^bc.lam - 1) / bc.lam
+
+model.bc <- lm(log(CLTV) ~ `Tenure Months` + `Total Charges` + `Device Protection` + 
+    `Internet Service` + `Streaming TV` + `Online Backup`,data=dat.nooutliers.reduced)
+
+rs <- rstandard(model.bc)
+
+qqnorm(rs)
+qqline(rs)
+```
+
+We still have some heavy tails after the box cox transformation, but normality is slightly better
+
+```{r}
+resids.standard <- rstandard(model.bc)
+hist(resids.standard)
+```
+
+We see from this histogram that the standardized residuals are approximately normally distributed, with a slight skew to the left side.
+
+So, our final model uses this box cox transformation and the log of the response (CLTV). We still do not have a great fit to this model, but we have done what we can to improve it
+
+## Predictions
+
+TODO: split into train and test
+TODO: evaluate multiple prediction metrics using our best model
+TODO: compare prediction metrics to neural net?
