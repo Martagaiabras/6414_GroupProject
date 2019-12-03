@@ -15,18 +15,27 @@ output: html_document
 source("./Logistic Regression/DataTransformation.R")
 ```
 
+# Creating training and testing datasets
+
 ```{r}
-install.packages("tree")
+
+set.seed(1)
+names(dat.reduced_2)<-str_replace_all(names(dat.reduced_2), c(" " = "." ))
+
+split = sample.split(dat.reduced_2$`Churn.Value`, SplitRatio = 0.75)
+train = subset(dat.reduced_2, split == TRUE)
+test = subset(dat.reduced_2, split == FALSE)
+```
+
+
+```{r}
 library(tree)
 library(tidyverse)
 
 ```
 
 ```{r}
-set.seed(1)
-names(dat.reduced_2)<-str_replace_all(names(dat.reduced_2), c(" " = "." ))
-
-decision_tree <- tree(Churn.Value~., data = dat.reduced_2)
+decision_tree <- tree(Churn.Value~., data = train)
 ```
 
 ```{r}
@@ -40,15 +49,18 @@ plot(decision_tree_cv$size,decision_tree_cv$dev, type ='b')
 ```
 
 ```{r}
-decision_tree_pruned <- prune.tree(decision_tree, best = 4)
+decision_tree_pruned <- prune.tree(decision_tree, best = 5)
 plot(decision_tree_pruned)
 text(decision_tree_pruned)
 ```
 
 ```{r}
-
+thresholds = array() 
+accuracies = array() 
 
 for (threshold in seq(0,1,by=0.1)){
+  
+thresholds = c(thresholds,threshold)
   
 predicted_churn_score <- predict(decision_tree_pruned)
 predicted_churn_score <- predicted_churn_score[,2]
@@ -59,9 +71,23 @@ predicted_churn_score[predicted_churn_score >= threshold] = 1
 
 count=0
 for (i in 1:length(predicted_churn_score)) {
-if(predicted_churn_score[i] == dat.reduced_2$Churn.Value[i]) count = count+1
+if(predicted_churn_score[i] == train$Churn.Value[i]) count = count+1
 }
 accuracy=count/length(predicted_churn_score)
-print(accuracy)
+accuracies = c(accuracies,accuracy)
+
 }
+
+plot(thresholds,accuracies, type ='b')
+print(accuracies)
 ```
+
+```{r}
+predictTrain = predict(decision_tree_pruned)[,2]
+table(train$`Churn.Value`, predictTrain > 0.5)
+```
+
+Sensitivity: 509/(893+509)=0.36
+Specificity: 3643/(3643+229) = 94%
+
+
