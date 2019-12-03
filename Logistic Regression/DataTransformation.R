@@ -53,7 +53,7 @@ dat.reduced_3$Tenure <- cut(dat.reduced_2$`Tenure Months`, 5, labels = c("bin1",
 
 
 #4. Removing tenure months continuous and adding factor
-dat.reduced_3 <- dat.reduced_3[ , !(names(dat.reduced_3) %in% "`Tenure Months`")]
+dat.reduced_3 <- dat.reduced_3[ , !(names(dat.reduced_3) %in% "Tenure Months")]
 
 
 #5. Including total charges as bin
@@ -62,5 +62,6 @@ dat.reduced_3 <- cbind(dat.reduced_3, Charges)
 dat.reduced_3$Charges <- cut(dat.reduced_3$Charges, 5, labels = c("bin1", "bin2", "bin3", "bin4", "bin5"))
 
 #6. Removing charges total + monthly charges 
-dat.reduced_3 <- dat.reduced_3[ , !(names(dat.reduced_3) %in% c("`Monthly Charges`", "``Total Charges"))]
+dat.reduced_3 <- dat.reduced_3[ , !(names(dat.reduced_3) %in% c("Monthly Charges", "Total Charges"))]
 
+s

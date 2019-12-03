@@ -19,13 +19,13 @@ source("./Logistic Regression/DataTransformation.R")
 
 
 ```{r}
-dat.reduced_2$`Churn Value` = as.numeric(dat.reduced_2$`Churn Value`)
+dat.reduced_3$`Churn Value` = as.numeric(dat.reduced_3$`Churn Value`)
 
 
-obdata.agg.n = aggregate(`Churn Value`~ . , data = dat.reduced_2, FUN=length)
+obdata.agg.n = aggregate(`Churn Value`~ . , data = dat.reduced_3, FUN=length)
 
 
-obdata.agg.y = aggregate(`Churn Value`~ . , data = dat.reduced_2, FUN=sum)
+obdata.agg.y = aggregate(`Churn Value`~ . , data = dat.reduced_3, FUN=sum)
 
 
 data <- cbind(obdata.agg.n, obdata.agg.y$`Churn Value`)
@@ -348,7 +348,7 @@ hist(res,10,xlab="Std residuals", main="")
 # Aggregating data  - Aggregating by all categorical variables with tenure as categorical with bins defined on data transformation
 
 ```{r}
-dat.reduced_2$`Churn Value` = as.numeric(dat.reduced_3$`Churn Value`)
+dat.reduced_3$`Churn Value` = as.numeric(dat.reduced_3$`Churn Value`)
 
 
 obdata.agg.n = aggregate(`Churn Value`~ . , data = dat.reduced_3, FUN=length)
