@@ -30,7 +30,7 @@ obdata.agg.y = aggregate(`Churn Value`~ . , data = dat.reduced_3, FUN=sum)
 
 data <- cbind(obdata.agg.n, obdata.agg.y$`Churn Value`)
 
-data <- data %>% rename_at(19,~"Total")
+data <- data %>% rename_at(20,~"Total")
 
 ## Fitting the model
 

@@ -15,14 +15,21 @@ output: html_document
 source("./Logistic Regression/DataTransformation.R")
 ```
 
+# Creating training and testing datasets
+
+```{r}
+set.seed(88)
+split = sample.split(dat.reduced_2$`Churn Value`, SplitRatio = 0.75)
+train = subset(dat.reduced_2, split == TRUE)
+test = subset(dat.reduced_2, split == FALSE)
+```
 
 
 # Full model
 
 ```{r}
-full.model <- glm(`Churn Value` ~., family = "binomial", data = dat.reduced_2)
+full.model <- glm(`Churn Value` ~., family = "binomial", data = train)
 summary(full.model)
-
 ```
 
 
@@ -58,15 +65,35 @@ step.model$anova
 ```
 
 
+
+# Full model 2 - Using tenure and total charges as binds
+
+
+```{r}
+full.model_2 <- glm(`Churn Value` ~., family = "binomial", data = train)
+summary(full.model_2)
+```
+
+
+# Step model 2 - with variables as categorical 
+
+```{r}
+#both directions step model
+step.model <- stepAIC(full.model_2, trace=0)
+step.model$anova
+```
+
+
 # Lasso model
+
 ```{r}
 #converting data to dataframe and scaling
 
-data.matrix <- as.matrix(dat.reduced_2)
-x <- model.matrix( ~ ., dat.reduced_2)
+data.matrix <- as.matrix(train)
+x <- model.matrix( ~ ., train)
 
-predictors <- x[,1:length(dat.reduced_2)-1]
-response <-  x[,length(dat.reduced_2)]
+predictors <- x[,1:length(train)-1]
+response <-  x[,length(train)]
 
 
 #Using cross validation for the Lasso regression
