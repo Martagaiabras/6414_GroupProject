@@ -38,16 +38,7 @@ dim(dat.reduced_2)
 
 print(20/7032)
 
-
-dat.reduced_2 <- data.frame(lapply(dat.reduced_2, function(x) {
-  gsub("No internet service", "No", x)}))
-
-dat.reduced_2 <- data.frame(lapply(dat.reduced_2, function(x) {
-  gsub("No phone service", "No", x)}))
-
 #3. Creating buckets for Tenure months
-
-
 
 dat.reduced_2  %>%  summarize(
   avg_tenure = mean(`Tenure Months`),
@@ -73,4 +64,3 @@ dat.reduced_3$Charges <- cut(dat.reduced_3$Charges, 5, labels = c("bin1", "bin2"
 #6. Removing charges total + monthly charges 
 dat.reduced_3 <- dat.reduced_3[ , !(names(dat.reduced_3) %in% c("Monthly Charges", "Total Charges"))]
 
-s
