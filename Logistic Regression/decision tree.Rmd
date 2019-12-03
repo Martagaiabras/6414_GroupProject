@@ -90,4 +90,11 @@ table(train$`Churn.Value`, predictTrain > 0.5)
 Sensitivity: 509/(893+509)=0.36
 Specificity: 3643/(3643+229) = 94%
 
+```{r}
+library(ROCR)
+ROCRpred = prediction(predictTrain, train$`Churn.Value`)
+ROCRperf = performance(ROCRpred, "tpr", "fpr")
+# Plot ROC curve
+plot(ROCRperf, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
+```
 
