@@ -1,0 +1,66 @@
+---
+title: "Decision_tree"
+author: "Rishi Bubna"
+date: "03/12/2019"
+output: html_document
+---
+
+```{r setup}
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```
+
+```{r, include=FALSE}
+source("./Logistic Regression/DataTransformation.R")
+```
+
+
+```{r}
+library(randomForest)
+require(caTools)
+```
+# Creating training and testing datasets
+
+```{r}
+
+set.seed(1)
+names(dat.reduced_2)<-str_replace_all(names(dat.reduced_2), c(" " = "." ))
+
+dat.reduced_2$Total.Charges <- as.numeric(as.character(dat.reduced_2$Total.Charges))
+dat.reduced_2$Tenure.Months<- as.numeric(as.character(dat.reduced_2$Tenure.Months))
+dat.reduced_2$Monthly.Charges  <- as.numeric(as.character(dat.reduced_2$Total.Charges))
+
+split = sample.split(dat.reduced_2$`Churn.Value`, SplitRatio = 0.75)
+train = subset(dat.reduced_2, split == TRUE)
+test = subset(dat.reduced_2, split == FALSE)
+```
+
+
+```{r}
+
+str(train)
+```
+
+```{r}
+rf <- randomForest(Churn.Value~., data = train)
+rf
+```
+
+```{r}
+predTrain <- predict(rf, train, type = "class")
+table(predTrain, train$Churn.Value)  
+```
+
+```{r}
+predTest <- predict(rf, test, type = "class")
+mean(predTest == test$Churn.Value)                    
+table(predTest,test$Churn.Value)
+```
+
+```{r}
+importance(rf)        
+varImpPlot(rf) 
+```
+
+

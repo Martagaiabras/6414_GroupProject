@@ -38,7 +38,16 @@ dim(dat.reduced_2)
 
 print(20/7032)
 
+
+dat.reduced_2 <- data.frame(lapply(dat.reduced_2, function(x) {
+  gsub("No internet service", "No", x)}))
+
+dat.reduced_2 <- data.frame(lapply(dat.reduced_2, function(x) {
+  gsub("No phone service", "No", x)}))
+
 #3. Creating buckets for Tenure months
+
+
 
 dat.reduced_2  %>%  summarize(
   avg_tenure = mean(`Tenure Months`),
