@@ -12,6 +12,7 @@ library(gridExtra)
 require(faraway)
 library(aod)
 library(ggpubr)
+library(caTools)
 
 #importing data
 dat <- read_csv('Telco_customer_churn.csv')
