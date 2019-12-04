@@ -2,12 +2,14 @@
 title: '6414 Group Project - Telecom Customer Churn Modeling '
 author: "Jared Babcock, Rishi Bubna, Marta Bras"
 date: "`r Sys.Date()`"
-output:  
+output:
   pdf_document:
-    toc: true
-    number_sections: true
-header-includes:
-    - \usepackage{setspace}\doublespacing
+    number_sections: yes
+    toc: yes
+  html_document:
+    df_print: paged
+    toc: yes
+header-includes: \usepackage{setspace}\doublespacing
 ---
 
 ```{r setup, include=FALSE}
@@ -15,6 +17,7 @@ knitr::opts_chunk$set(echo = FALSE)
 source("LoadingData.R")
 source("CSS.R")
 source("./Logistic Regression/Model comparison.R")
+source("./Linear Regression/LinRegCode.R")
 source("./Clustering/clustering.R")
 ```
 
@@ -55,7 +58,7 @@ Considering what was already mentioned, our goals with this project are:
 
 1. Building a predictive model for churn rate that best identifies which customers are likely to churn.
 
-2. Building a predictive model for CLTV that best identifies how much a customer is worth for the company.
+2. Building a predictive model for CLTV that best identifies how much a customer is worth for the company and the factors that contribute most to CLTV.
 
 3. Perform customer segmentation to identify high value customers that are likely to churn.
 
@@ -127,7 +130,7 @@ kable(summary_churn_2, digits = 0, format = "latex", booktabs = T, caption = "To
 ## Methods used 
 The implementation and transformations performed for each of the methods used are summarized in the table below.
 ```{r, message = FALSE}
-method  <- c("Linear Regression", "Logisitc Regression")
+method  <- c("Linear Regression", "Logistic Regression")
 response  <- c("CLTV value","Churn(Y/N)")
 implementation <- c("1. Splitting the data int training/testing datasets, 2. Run Full model, 3. Check for model assumptions 4. Transform the variables and remove outliers, 5. Variable selection models, 6. Performance measures in the testing dataset", "1. Splitting the data int training/testing datasets, 2. Run Full model, 3. Aggregating data for categorical variables, 4. Check for model assumptions 5. Transform the variables and remove outliers, 6. Variable selection models, 7. Performance measures in the testing dataset")
 
@@ -136,7 +139,7 @@ transformations <- c("1. Numerical variable to bins(categorical variable)", "1. 
 a <- as.data.frame(cbind(method, response, implementation, transformations))
  
 
-kable(a, digits =6, caption = "Results") %>%
+kable(a, digits =6, caption = "Methods") %>%
 kable_styling(latex_options = c("striped", "HOLD_position"), full_width = FALSE) %>%
 column_spec(c(2, 3, 4), width = c("1.9cm","8cm", "3.5cm"))
 ```
@@ -211,10 +214,31 @@ kable(table_2, digits = 0, format = "latex", booktabs = T, caption = "Results fo
 
 ```
 
-##  CLTV : Predictive model 
+##  CLTV - Linear Regression Model
 
+```{r}
+kable(model.comp, format = "latex", booktabs = T, caption = "Metrics for different linear regression models") %>%
+  kable_styling(latex_options = c("striped", "HOLD_position"),
+                full_width = F)
+```
 
+The forward stepwise regression model has the best metrics for Mallow's CP, AIC, and BIC, and has only slightly smaller adjusted $R^2$ than the larger and more complex full model and elastic net model, so we will choose the forward stepwise regression model as our preferred model.
 
+```{r}
+kable(model.coefs, format = "latex", booktabs = T, caption = "Significant Predictors of CLTV") %>%
+  kable_styling(latex_options = c("striped", "HOLD_position"),
+                full_width = F)
+```
+
+We can see from the above table that Tenure Months, Total Charges, Device Protection, and Internet Service significantly explain CLTV at differing signficance levels. The Tenure Months coefficient can be interpreted to mean that for each additional month a customer is tenured, their lifetime value increases by ~17. The Total Charges coefficient can be interpreted to mean that for each additional dollar charge, a customer's lifetime value increases by ~0.05. The baseline for Device Protection is No protection, so that coefficient can be interpreted to mean that if a customer accepts device protection, their lifetime value decreases by ~94. The baseline for Internet Service is DSL, so that coefficient can be interpreted to mean that if a customer switches from DSL to fiber optic internet service, their lifetime value decreases by ~64. All interpretations with respect to a particular coefficient assume that all other predictors are held constant.
+
+```{r}
+kable(metrics.comp, format = "latex", booktabs = T, caption = "Comparison of Metrics for Forward Stepwise Regression Model and Boosted Regression") %>%
+  kable_styling(latex_options = c("striped", "HOLD_position"),
+                full_width = F)
+```
+
+We can see from various prediction metrics that the linear regression model obtained from forward stepwise regression performs signficantly better than the out-of-the-box gradient boosted regression model. 
 
 ## Customer segmentation
 
