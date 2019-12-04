@@ -1,31 +1,33 @@
-#sourcing 
+## Sourcing 
 source("./Logistic Regression/DataTransformation.R")
 source("./Logistic Regression/Splittingdata.R")
 
 
-#removing the spaces from variable names
+## Removing the spaces from variable names
 names(train)<-str_replace_all(names(train), c(" " = "." ))
 names(test)<-str_replace_all(names(test), c(" " = "." ))
 
 
-#building model
+## Building model
 decision_tree <- tree(Churn.Value~., data = train)
 
+
+
 #plotting model
-plot(decision_tree)
-text(decision_tree)
+#plot(decision_tree)
+#text(decision_tree)
 
 decision_tree_cv <- cv.tree(decision_tree)
-plot(decision_tree_cv$size,decision_tree_cv$dev, type ='b')
+#plot(decision_tree_cv$size,decision_tree_cv$dev, type ='b')
 
 
-#prunning decision tree
+## Prunning decision tree
 decision_tree_pruned <- prune.tree(decision_tree, best = 5)
-plot(decision_tree_pruned)
-text(decision_tree_pruned)
+#plot(decision_tree_pruned)
+#text(decision_tree_pruned)
 
            
-#thresholds and accuracy
+## Thresholds and accuracy
 thresholds = array() 
 accuracies = array() 
 
@@ -49,23 +51,32 @@ for (threshold in seq(0,1,by=0.1)){
   
 }
 
-plot(thresholds,accuracies, type ='b')
-print(accuracies)
+#plot(thresholds,accuracies, type ='b')
+#print(accuracies)
 
 
-#predicting
-predictTrain = predict(decision_tree_pruned)[,2]
-table(train$`Churn.Value`, predictTrain > 0.5)
+## Predicting
+predictTrain_DT = predict(decision_tree_pruned)[,2]
+table_DT_train <- table(train$`Churn.Value`, predictTrain_DT >= 0.2)
+
+predictTest_DT = predict(decision_tree_pruned, test)[,2]
+table_DT <- table(test$`Churn.Value`, predictTest_DT >= 0.2)
+
+
 
 #Sensitivity: 509/(893+509)=0.36
 #Specificity: 3643/(3643+229) = 94%
 
-#ROCR
-ROCRpred = prediction(predictTrain, train$`Churn.Value`)
-ROCRperf = performance(ROCRpred, "tpr", "fpr")
+## ROCR
+ROCRpred_DT = prediction(predictTest_DT, test$`Churn.Value`)
+ROCRperf_DT = performance(ROCRpred_DT, "tpr", "fpr")
 # Plot ROC curve
-plot(ROCRperf, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
+#plot(ROCRperf_DT, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
 
 
-#Decision tree for insigth 
+## Decision tree for insigth 
 
+library(rpart)
+library(rpart.plot)
+fit <- rpart(Churn.Value~., data = train)
+#rpart.plot(fit, extra = 110)

@@ -7,30 +7,33 @@ source("./Logistic Regression/Splittingdata.R")
 names(train)<-str_replace_all(names(train), c(" " = "." ))
 names(test)<-str_replace_all(names(test), c(" " = "." ))
 
+
 #converting variables to numeric
 train$Total.Charges <- as.numeric(as.character(train$Total.Charges))
 train$Tenure.Months<- as.numeric(as.character(train$Tenure.Months))
 train$Monthly.Charges  <- as.numeric(as.character(train$Total.Charges))
+#train$Churn.Value  <- as.numeric(as.character(train$Churn.Value))
 
 test$Total.Charges <- as.numeric(as.character(test$Total.Charges))
 test$Tenure.Months<- as.numeric(as.character(test$Tenure.Months))
-test$Monthly.Charges  <- as.numeric(as.character(test$Total.Charges))
+#test$Churn.Value  <- as.numeric(as.character(test$Churn.Value))
 
 
-str(train)
+#str(train)
 
 #building the random forest
 rf <- randomForest(Churn.Value~., data = train)
-rf
+#rf
+
 
 #predicting
-predTrain <- predict(rf, train, type = "class")
-table(predTrain, train$Churn.Value)  
+predTrain <- predict(rf, train, type = "prob")
+#table(predTrain, train$Churn.Value)  
 
 
-predTest <- predict(rf, test, type = "class")
-mean(predTest == test$Churn.Value)                    
-table(predTest,test$Churn.Value)
+predTest <- predict(rf, newdata = test)
+#mean(predTest == test$Churn.Value)                    
+table_rf <- table(test$Churn.Value, predTest >=0.2)
 
 
 #variable importance 

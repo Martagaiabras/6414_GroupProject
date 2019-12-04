@@ -10,11 +10,19 @@ target <- train$`Churn Value`
 nb1 <- NaiveBayes(target ~.,data=train, usekernel=T) 
 
 #prediction
-p1 <- predict(nb1, test[,1:19])
+p1 <- predict(nb1, test)$posterior[,2]
+
+
+table_bayes <- table(test$`Churn Value`, p1 >= 0.2)
+
+#ROCRpred = prediction(p1, test$`Churn Value`)
+#ROCRperf = performance(ROCRpred, "tpr", "fpr")
+#plot(ROCRperf, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
+
 
 #confusion matrix
-table(true = test$`Churn Value`, predict = p1$class)
-1 - mean(p1$class != test$`Churn Value`)
+#table(true = test$`Churn Value`, p1 >= 0.2)
+#1 - mean(p1$class != test$`Churn Value`)
 
 
 #2. SVM Model 
