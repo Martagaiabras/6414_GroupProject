@@ -140,7 +140,21 @@ Looking at the above output, we will first remove Monthly Charges since it has a
 ```{r}
 # Monthly charges is in column 18, so remove that from the data
 
-dat.nooutliers.reduced <- dat.nooutliers[,-18]
+dat.nooutliers.reduced.full <- dat.nooutliers[,-18]
+```
+
+We now want to do a 75/25 train/test split with the data for prediction later on
+
+```{r}
+## 75% of the sample size
+train_size <- floor(0.75 * nrow(dat.nooutliers.reduced.full))
+
+## set the seed to make your partition reproducible
+set.seed(6414)
+train_indices <- sample(seq_len(nrow(dat.nooutliers.reduced.full)), size = train_size)
+
+testData <- dat.nooutliers.reduced.full[-train_indices, ]
+dat.nooutliers.reduced <- dat.nooutliers.reduced.full[train_indices, ]
 ```
 
 ```{r}
@@ -275,7 +289,7 @@ sapply(dat.nooutliers.reduced,class)
 Do a log transformation on the numeric variables Tenure Months and Total Charges
 
 ```{r}
-dat.nooutliers.reduced.logtransform <- dat.nooutliers.reduced
+dat.nooutliers.reduced.logtransform <- cbind(dat.nooutliers.reduced)
 dat.nooutliers.reduced.logtransform$`Tenure Months` <- log(dat.nooutliers.reduced.logtransform$`Tenure Months`)
 dat.nooutliers.reduced.logtransform$`Total Charges` <- log(dat.nooutliers.reduced.logtransform$`Total Charges`)
 
@@ -342,11 +356,13 @@ bc<- boxcox(model.logresponse)
 # Get lambda from the boxcox function
 bc.lam <- bc$x[which.max(bc$y)]
 
+dat.bc <- cbind(dat.nooutliers.reduced)
+
 # Then do a power transformation using that lambda
-dat.nooutliers.reduced$CLTV <- (dat.nooutliers.reduced$CLTV^bc.lam - 1) / bc.lam
+dat.bc$CLTV <- (dat.bc$CLTV^bc.lam - 1) / bc.lam
 
 model.bc <- lm(log(CLTV) ~ `Tenure Months` + `Total Charges` + `Device Protection` + 
-    `Internet Service` + `Streaming TV` + `Online Backup`,data=dat.nooutliers.reduced)
+    `Internet Service` + `Streaming TV` + `Online Backup`,data=dat.bc)
 
 rs <- rstandard(model.bc)
 
@@ -367,6 +383,69 @@ So, our final model uses this box cox transformation and the log of the response
 
 ## Predictions
 
-TODO: split into train and test
-TODO: evaluate multiple prediction metrics using our best model
-TODO: compare prediction metrics to neural net?
+We now want to use the testing data to evaluate prediction of our best model. Make sure to transform the response variable for testData
+using the above box cox transformation for consistency
+
+```{r}
+testData.bc <- cbind(testData)
+
+testData.bc$CLTV <- (testData.bc$CLTV^bc.lam - 1) / bc.lam
+
+preds <- predict(model.bc,testData.bc,interval='prediction')
+```
+
+Mean squared prediction error (use log of CLTV since that is what our model predicts for)
+```{r}
+mean((preds-log(testData.bc$CLTV))^2)
+```
+
+Mean absolute prediction error
+```{r}
+mean(abs(preds-log(testData.bc$CLTV)))
+```
+
+Mean absolute percentage error
+```{r}
+mean(abs(preds-log(testData.bc$CLTV))/log(testData.bc$CLTV))
+```
+
+Precision measure
+```{r}
+sum((preds-log(testData.bc$CLTV))^2)/sum((log(testData.bc$CLTV)-mean(log(testData.bc$CLTV)))^2)
+```
+
+Since we saw that our data exhibited some nonlinear patterns, we will also evaluate prediction using a model that typically works well
+with nonlinear data: gradient boosted regression. No box cox or logarithmic transformation is used here.
+
+
+```{r}
+library(gbm)
+
+model.boosted <- gbm(as.formula(CLTV~.),data=dat.nooutliers.reduced,distribution = 'gaussian')
+
+preds.boosted <- predict(model.boosted,testData,interval='prediction',n.trees=100)
+```
+
+
+Gradient boosted metrics
+Mean squared prediction error (use non-transformed CLTV since that is what the boosted model predicts for)
+```{r}
+mean((preds.boosted-testData$CLTV)^2)
+```
+
+Mean absolute prediction error
+```{r}
+mean(abs(preds.boosted-testData$CLTV))
+```
+
+Mean absolute percentage error
+```{r}
+mean(abs(preds.boosted-testData$CLTV)/testData$CLTV)
+```
+
+Precision measure
+```{r}
+sum((preds.boosted-testData$CLTV)^2)/sum((testData$CLTV-mean(testData$CLTV))^2)
+```
+
+It appears that the gradient boosted model performs worse for prediction than our linear regression model
