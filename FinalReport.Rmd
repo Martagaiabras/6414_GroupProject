@@ -6,14 +6,16 @@ output:
   pdf_document:
     number_sections: yes
     toc: yes
+  word_document:
+    toc: yes
   html_document:
     df_print: paged
     toc: yes
-header-includes: \usepackage{setspace}\doublespacing
+header-includes: \usepackage{setspace}\doublespacing\usepackage{float}\floatplacement{figure}{H}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE,fig.pos="h")
 source("LoadingData.R")
 source("CSS.R")
 source("./Logistic Regression/Model comparison.R")
@@ -222,7 +224,8 @@ kable(model.comp, format = "latex", booktabs = T, caption = "Metrics for differe
                 full_width = F)
 ```
 
-The forward stepwise regression model has the best metrics for Mallow's CP, AIC, and BIC, and has only slightly smaller adjusted $R^2$ than the larger and more complex full model and elastic net model, so we will choose the forward stepwise regression model as our preferred model.
+The forward stepwise regression model has the best metrics for Mallow's CP, AIC, and BIC, and has only slightly smaller adjusted $R^2$ than the larger and more complex full model and elastic net model, so we will choose the forward stepwise regression model as our preferred model. The visual analytics for goodness of fit of this model can be found in the appendix. 
+
 
 ```{r}
 kable(model.coefs, format = "latex", booktabs = T, caption = "Significant Predictors of CLTV") %>%
@@ -253,7 +256,7 @@ The implications of our project are very important to any companies looking to r
 
 ### Limitations:
 
-* The linearity and normality assumptions were somewhat violated in the linear regression model, even after logarithmic and box-cox transformations.
+* The linearity, constant variance and normality assumptions were somewhat violated in the linear regression model, even after logarithmic and box-cox transformations.
 
 * The hyperparameters for the gradient boosted regression model was not tuned; default values were used.
 
@@ -274,8 +277,8 @@ The implications of our project are very important to any companies looking to r
 
 # Appendix
 
-
-```{r, fig.height=5}
+## Exploratory Data Anaysis
+```{r, fig.height=3,fig.width=5,fig.align='center'}
 ggplot(dat, aes(x=`Churn Score`)) + 
   geom_histogram(binwidth = 5, fill = "grey") +
   ggtitle("Histogram of Churn Score") +
@@ -317,3 +320,36 @@ ggplot_4 <- ggplot(dat, aes(y=`Churn Score`, x=`Phone Service`, color =`Phone Se
 ggarrange(ggplot_1,ggplot_2, ggplot_3, ggplot_4, nrow = 2, ncol =2)
 ```
 
+## Goodness of Fit for Forward Stepwise Linear Regression Model
+
+```{r}
+plot(bc.fitted.vals,rs,xlab="Fitted Values",ylab="Standardized Residuals",main="Standardized Residuals vs. Fitted Values")
+```
+
+This plot of the the standardized residuals vs the fitted values shows that the independence assumption likely holds, but the constant variance assumption is likely violated because there is a downward trend in the standardized residuals as the fitted values increase.
+
+```{r, fig.height=8}
+par(mfrow=c(2,1))
+
+plot(dat.bc$`Tenure Months`,dat.bc$CLTV,xlab="Tenure Months",ylab="CLTV",main="CLTV vs. Tenure Months")
+plot(dat.bc$`Total Charges`,dat.bc$CLTV,xlab="Total Charges",ylab="CLTV",main="CLTV vs. Total Charges")
+```
+
+The two plots above show that the linearity assumption does not hold; the response values (CLTV) are dispersed widely when plotted against both Tenure Months and Total Charges. Note that CLTV values are so large here because of the Box-Cox Transformation.
+
+```{r}
+qqnorm(rs)
+qqline(rs)
+```
+
+```{r}
+hist(resids.standard,xlab="Standardized Residuals",ylab="Frequency",main="Histogram of Standardized Residuals")
+```
+
+The QQ-Plot and histogram of standardized residuals above show that the normality assumption may hold, but that the data has heavy tails. In addition, the histogram of standardized residuals shows a slight leftward skew.
+
+## Gradient Boosted Models
+
+We did not go over boosted models in class, but they can be sometimes useful when dealing with complex non-linear patterns in data. Boosted regression trees partition data at each split and determine the residuals for each partition. The children of each branch will be fitted to those residuals and successive splits aim to find partitions that further reduce error. However, this class of models is black-box, so we lose interpretability. In addition, these models can sometimes severely overfit to the training data, which could explain some of the poor prediction results we got from the boosted tree in our analysis.
+
+Source: StatSoft, Inc. (2013). Electronic Statistics Textbook. Tulsa, OK: StatSoft. WEB: http://www.statsoft.com/textbook/.
