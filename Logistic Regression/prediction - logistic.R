@@ -35,6 +35,10 @@ predictTest_log = predict(full.model, type = "response", newdata = test)
 step_model <- glm(`Churn Value` ~ Partner + Dependents + `Multiple Lines` + `Internet Service` + `Online Security` + `Online Backup` + `Tech Support` + `Streaming TV` +  `Streaming Movies` + Contract + `Paperless Billing` + `Payment Method` , family = "binomial", data = train)
 predictTest_log = predict(step_model, type = "response", newdata = test)
 step_table <- table(test$`Churn Value`, predictTest_log >= 0.2)
+#other t values
+step_table_0.5 <- table(test$`Churn Value`, predictTest_log >= 0.5)
+step_table_0.6 <- table(test$`Churn Value`, predictTest_log >= 0.6)
+
 
 ROCRpred = prediction(predictTest_log, test$`Churn Value`)
 ROCRperf = performance(ROCRpred, "tpr", "fpr")

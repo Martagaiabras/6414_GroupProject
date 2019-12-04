@@ -58,11 +58,11 @@ for (threshold in seq(0,1,by=0.1)){
 ## Predicting
 predictTrain_DT = predict(decision_tree_pruned)[,2]
 table_DT_train <- table(train$`Churn.Value`, predictTrain_DT >= 0.2)
-
 predictTest_DT = predict(decision_tree_pruned, test)[,2]
 table_DT <- table(test$`Churn.Value`, predictTest_DT >= 0.2)
-
-
+#other T values
+table_DT_0.5 <- table(test$`Churn.Value`, predictTest_DT >= 0.5)
+table_DT_0.6 <- table(test$`Churn.Value`, predictTest_DT >= 0.6)
 
 #Sensitivity: 509/(893+509)=0.36
 #Specificity: 3643/(3643+229) = 94%

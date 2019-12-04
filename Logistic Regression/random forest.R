@@ -27,18 +27,22 @@ rf <- randomForest(Churn.Value~., data = train)
 
 
 #predicting
-predTrain <- predict(rf, train, type = "prob")
+predTrain_rf <- predict(rf, train, type = "prob")
 #table(predTrain, train$Churn.Value)  
 
 
-predTest <- predict(rf, newdata = test)
+predTest_rf <- predict(rf, newdata = test, type = "prob")[,2]
 #mean(predTest == test$Churn.Value)                    
-table_rf <- table(test$Churn.Value, predTest >=0.2)
-
+table_rf <- table(test$Churn.Value, predTest_rf >=0.2)
+table_rf_0.5 <- table(test$Churn.Value, predTest_rf >=0.5)
+table_rf_0.6 <- table(test$Churn.Value, predTest_rf >=0.6)
 
 #variable importance 
-importance(rf)        
-varImpPlot(rf) 
+#importance(rf)        
+#varImpPlot(rf) 
 
+#ROC curves
+ROCRpred_RF = prediction(predTest_rf, test$`Churn.Value`)
+ROCRperf_RF = performance(ROCRpred_RF, "tpr", "fpr")
 
 

@@ -10,6 +10,12 @@ header-includes:
     - \usepackage{setspace}\doublespacing
 ---
 
+```{r setup}
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 source("LoadingData.R")
@@ -90,7 +96,7 @@ kable(summary_table, digits = 0, format = "latex", booktabs = T, caption = "Over
   kable_styling(latex_options = c("striped", "hold_position"),
                 full_width = F)
 ```
-  
+
 From the customers, 5,174 have not churned (73.4%). We categorized the different reasons for churn that were provided in the feature "Churn Reason" in the database in 5 subcategories: competitors, customer service, produce features, price and others (see table 3). Interestingly, even though competitors and price play a big role, bad customer service was reported as being the second main reason for churn. Additionally, if we consider bad customer service and bad product features together, these two reasons had a more important role in customer churn than price and competition together. 
 
 ```{r, message = FALSE}
@@ -117,13 +123,12 @@ summary_churn_2 <- dat  %>%  filter(`Churn Reason` != "NA" & `Churn Reason` != "
 
 
 kable(summary_churn_2, digits = 0, format = "latex", booktabs = T, caption = "Top 5 churn reasons") %>%
-  kable_styling(latex_options = c("striped", "HOLD_position"),
+  kable_styling(latex_options = c("striped", "hold_position"),
                 full_width = F)
 
 ```
 
 ## Methods used 
-
 The implementation and transformations performed for each of the methods used are summarized in the table below.
 ```{r, message = FALSE}
 method  <- c("Linear Regression", "Logisitc Regression")
@@ -132,8 +137,6 @@ implementation <- c("1. Splitting the data int training/testing datasets, 2. Run
 
 
 transformations <- c("1. Numerical variable to bins(categorical variable)", "1. Numerical variable to bins(categorical variable)")
-
-
 a <- as.data.frame(cbind(method, response, implementation, transformations))
  
 
@@ -145,7 +148,14 @@ column_spec(c(2, 3, 4), width = c("1.9cm","8cm", "3.5cm"))
 
 # Results 
 
-## Churn Rate : Predictive model 
+## Churn Rate - Insigths
+
+```{r}
+rpart.plot(fit, extra = 110)
+```
+
+
+## Churn Rate - Predictive model 
 
 
 
