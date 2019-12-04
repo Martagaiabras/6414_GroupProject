@@ -106,9 +106,9 @@ summary_churn <- dat %>% group_by(`Churn Value`) %>%
 
 
 
-kable(summary_churn, digits = 0, format = "latex", booktabs = T, caption = "Churn vs not churn") %>%
-  kable_styling(latex_options = c("striped", "hold_position"),
-                full_width = F)
+#kable(summary_churn, digits = 0, format = "latex", booktabs = T, caption = "Churn vs not churn") %>%
+  #kable_styling(latex_options = c("striped", "hold_position"),
+                #full_width = F)
 
 summary_churn_2 <- dat  %>%  filter(`Churn Reason` != "NA" & `Churn Reason` != "Don't know") %>% 
   mutate(Reason = case_when(
@@ -155,39 +155,43 @@ column_spec(c(2, 3, 4), width = c("1.9cm","8cm", "3.5cm"))
 
 As we have seen before, there are different reasons why customers churn - either because customers provided a better offer, the product features were not aligned to customers' interests, the customer service was bad, among others.
 
+From a marketing standpoint, it is interesting to understand if it is possible to group customers based on the reasons why they have churned. To do so, we have implemented a clustering algorithm. The results are presented in the graph and table below.
+
 
 ```{r, fig.align="center"}
 ggplot(aes(x = X, y = Y), data = tsne_data) +
   geom_point(aes(color = cluster)) + 
   annotate(geom="text", x=0, y=34, label="Competitors",
-              color="darkgreen")+ 
+              color="forestgreen")+ 
   annotate("rect", xmin = -8, xmax = 17, ymin = 5, ymax = 37, 
-  alpha = .08, color="darkgreen", lwd = 0.2) +
+  alpha = .08, color="forestgreen", lwd = 0.2) +
   annotate(geom="text", x=-35, y=10, label="Product features",
               color="purple")+ 
   annotate("rect", xmin = -45, xmax = -20, ymin = -25, ymax = 12, 
   alpha = .08, color="purple", lwd = 0.2) +
-    annotate(geom="text", x=-20, y=25, label="Customer service",
+    annotate(geom="text", x=-19, y=25, label="Customer service",
               color="turquoise4")+ 
   annotate("rect", xmin = -30, xmax = 0, ymin = -5, ymax = 28, 
   alpha = .08,  color="turquoise4", lwd = 0.2)+
     annotate(geom="text", x=-12.2, y=-8, label="Competitors",
               color="brown3")+ 
   annotate("rect", xmin = -20, xmax = 5, ymin = -35, ymax = -5, 
-  alpha = .08,  color="brown3", lwd = 0.2)
+  alpha = .08,  color="brown3", lwd = 0.2) +
+  ggtitle("Clustering of customers based on churn reason")+
+    theme(plot.title = element_text(size = 12))
 ```
 
 ```{r}
-cluster1 <- c("100% M", "92%young", "86%No", "95%No",  "62% Fiber", "49% competitors better offer, 24% customer service" )
+cluster1 <- c("100% M", "92%young", "86%No", "95%No",  "62% Fiber", "49% competitors, 24% customer service" )
 
-cluster2 <- c("100% F", "80%young", "100%No", "96%No",  "69% Fiber", "54% competitors better offer, 23% product features" )
+cluster2 <- c("100% F", "80%young", "100%No", "96%No",  "69% Fiber", "54% competitors, 23% product features" )
 
-cluster3 <- c("88% F", "86%young", "67%Yes", "91%No", "72% Fiber", "63% customer service, 16% competitors offer")
+cluster3 <- c("88% F", "86%young", "67%Yes", "91%No", "72% Fiber", "63% customer service, 16% competitors")
 
 cluster4 <- c("76% M", "77%senior", "73%Yes", "95%No",  "81% Fiber", "42% product features, 18% price")
 
 segments <- data.frame(t(cbind(cluster1,cluster2, cluster3,cluster4)))
-colnames(segments) <- c("Gender (F/M)", "Age group", "Partner (Y/N)", "Dependents (Y/N)", "Main Service", "Main Reasons")
+colnames(segments) <- c("Gender (F/M)", "Age group", "Partner", "Dependents", "Main Service", "Main Reasons")
 
 kable(segments, digits = 3, format = "latex", booktabs = T, caption = "Clustering segments") %>%
   kable_styling(latex_options = c("striped", "HOLD_position"),
@@ -203,16 +207,32 @@ Another important insigth from this clustering analysis is that the product feat
 
 ### Insights from decision tree model
 
-```{r}
-rpart.plot(fit, extra = 110)
+To understand how the different probabilities of churn change for different customer and product features, we developed a decision tree model. 
+The results are presented below. The first number in the node correspondes to the classification of the node (0 if not churn and 1 if churn). The second number in the node correspondes to the % of the customers on the other classification. The third value in the node measures the total % of customers that are included in that node. 
+
+```{r, fig.height=5}
+rpart.plot(fit, box.palette="RdBu", shadow.col="gray", nn=TRUE, cex = 0.6)
 ```
 
+The most important insigths are: 
+
+* The most important variable in determining churn rate is duration of contract. If the contract is 1 or 2 years the probability they will not churn is 93%. The probabilities of not churning are much lower if the contract is month-to-month. 45% of the total customers in the testing dataset fall in this category.
+
+* If the customer has a month-to-month contract, has fiber optic, is in default for more than 15 months and has dependents, the probability it will churn is only 9%. Only 2% of customers are in this node.
+
+* The higher churn occurs for month-to-month contracts, fiber optic, tenure higher than 15 months but lower than 52 months, no depedents and multiple lines. In that case, churn rate is 63%.
+
+* Overall, the probabilities of churn are high for month-to-month contracts. The company can create incentives for customers to subscribe to longer contracts.
 
 ## Churn Rate - Predictive model 
 
+We developed 4 classification models to predict churn. To measure the performance and chose the best model for prediction, we computed the ROC curve as it is one of the most important evaluation metrics for checking any classification model's performance. ROC is a probability curve and AUC represents degree or measure of separability. It tells how much model is capable of distinguishing between classes. 
+
+The results are presented below.
+
 ```{r}
 #ROC curve for different models
-plot(ROCRperf, col = 'darkred',lty = 2, lwd = 2, main = "ROC curve for different models", font.main=3, font.lab=3)
+plot(ROCRperf, col = 'darkred',lty = 2, lwd = 2, main = "ROC curve for different models", font.main=3, font.lab=3, cex.main = 1, cex.lab = 1)
 plot(ROCRperf_DT, col = 'darkgreen',lty = 10, lwd = 2, add = TRUE)
 plot(ROCRperf_RF, col = 'orange', lty = 6, lwd = 2, add = TRUE)
 #plot(ROCRperf_bayes, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
@@ -222,17 +242,39 @@ legend(0.2,0.45, c('logistic','decistiontree','randomforest', "kknn"),lty=c(1,1)
        lwd=c(2,2),col=c('darkred','darkgreen','orange', "blue"))
 
 ```
+The higher the AUC, the better the model is at predicting churn as churn (true positive) and not churn as not churn (true negative). Looking at the plot above, we can see that random forest has a higher under the curve for false positive rate values lower than 0.4 - in 40% of the cases we predicted as churn when the customer did not churn - and true positive rates lower than 0.8 (in 80% of the cases the customer churn when we predicted so). As the false positive rates increases, logistic model becomes better than random forest. Eventually KKNN and decision tree also become better than random forest for higher false positive rate.
+
+The choice of threshold is cruccial in this case. The question we are trying to answer is:
+
+* Do we want to identify more customers as likely to churn when in reality they will not churn, in order to not miss customers that will eventually churn 
+
+or 
+
+* Would we rather not identify some of the customers that are likely to churn in order to not incurr in uneccessary costs?
+
+In our analysis we are combining a classification model with a model that computes CLV. This allows us to filter which customers to target before actually incurring the costs associated with the extra efforts to retain the customers. 
+
+For that reason, we started by using a small threshold of 0.2%. This threshold implies that we are willing to take a lot of false positives, in order to have a high sensitivity rate (TP/(FN+TP)). Because we are getting a lot of false positives, our specificity (TN/(TN+FP)) will be low and our accuracy (TN+TP)/(TN+TP+FN+FP) will also be low.
 
 ```{r}
 kable(table, digits = 3, format = "latex", booktabs = T, caption = "Results for a threshold of 0.2") %>%
   kable_styling(latex_options = c("striped", "hold_position"),
                 full_width = F)
+```
 
-kable(table_2, digits = 3, format = "latex", booktabs = T, caption = "Results for different thresholds") %>%
+From the table, we can conclude random forest performs better for a low threshold meaning that it will be the best model predicting true positives. On the ohter hand it is the worst model at predicting false positives which makes it the worst model in terms of accuracy.
+
+It is not just the cost of acquiring a customer that is relevant for the company. There are other costs associated with the process, such as the computational cost of predicting CLV for each customer that is likely to churn. For that, we decided to measure the sensibility of the models to other threshold values - 0.5 and 0.8. The accuracy of the models for these levels are summarized in the table below.
+
+```{r}
+kable(table_2, digits = 3, format = "latex", booktabs = T, caption = "Accuracy for different thresholds") %>%
   kable_styling(latex_options = c("striped", "hold_position"),
                 full_width = F)
-
 ```
+
+We can see that the accuracy of random forest is higher for higher thresholds. This happens because
+
+
 
 ##  CLTV - Linear Regression Model
 
