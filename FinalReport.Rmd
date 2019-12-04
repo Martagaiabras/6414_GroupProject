@@ -23,9 +23,9 @@ source("./Clustering/clustering.R")
 
 # Abstract
 
-The telecommunications industry is facing a challenging context, with the emergence of new technologies and the increasing levels of competition resulting in unprecedent levels of customer attrition and price comptetion between the companies in the sector. 
+The telecommunications industry is facing a challenging future, with the emergence of new technologies and the increasing levels of competition resulting in unprecedented levels of customer attrition and price competition between the companies in the sector. 
 
-In a highly price sensitive market, customer service and product features play an important role. For telecommunication companies to better tailor their products to customer expectations, understanding the reasons for customer attrition is a cruccial step.  In that sense, customer churn analysis is one of the vital measures for subscription-based business models such as telecom services and internet providers.  
+In a highly price sensitive market, customer service and product features play an important role. For telecommunication companies to better tailor their products to customer expectations, understanding the reasons for customer attrition is a crucial step.  In that sense, customer churn analysis is one of the vital measures for subscription-based business models such as telecom services and internet providers.  
 
 In this report, we developed a model to explore the reasons why a specific telecommunications company's customers churn. In our analysis, we were particularly interested in understanding differences between groups, and to leverage that information to suggest future customer segmentation strategies. We used this model to also predict which customers are likely to churn in the future.
 
@@ -40,15 +40,15 @@ Preserving "at risk" valuable customers, while leveraging on information about d
 
 ## Reasons for our analysis
 
-Understanding customers' preferences is essential for any business, playing an even more important role when competiton and price elasticity of demand is high. This is the case for the telecommunication industry, in which customers frequently change among telecom operators, resulting in high churn rates and competitive pressures for the companies. 
+Understanding customers' preferences is essential for any business, playing an even more important role when competition and price elasticity of demand is high. This is the case for the telecommunication industry, in which customers frequently change among telecom operators, resulting in high churn rates and competitive pressures for the companies. 
 
-Customer segmentation and targeting are marketing strategies that allow companies to differentiate by tailoring their products to different groups' preferences. In our analysis, we were interested in using modelling to understand how different groups churn and how different factors influence churn rate. We believe the information provided by our models can be used to support strategic marketing decisions of the company in the medium/long run. 
+Customer segmentation and targeting are marketing strategies that allow companies to differentiate by tailoring their products to different groups' preferences. In our analysis, we were interested in using modeling to understand how different groups churn and how different factors influence churn rate. We believe the information provided by our models can be used to support strategic marketing decisions of the company in the medium/long run. 
 
 Another important aspect in strategic decision making is provided by the concept of CLV. Customer lifetime value is a prediction of the net profit of a particular customer during the future relationship with the company. In that sense, it is a good indicator of which customers are worth investing marketing efforts to retain them and which are not.In our analysis, we use modelling to predict the CLV for each customer. 
 
-We combine our predictive model for churn with our predictive model for CLV, to provide a tool for the company to proactively identify  customers to target their marketing efforts, in an attemp to not loose them in the future. 
+We combine our predictive model for churn with our predictive model for CLV, to provide a tool for the company to proactively identify customers to target their marketing efforts, in an attempt to not lose them in the future. 
 
-We believe that using analytical modelling will help telecommunications' companies ehnance their business model and marketing strategies and further differentiate from competitors.
+We believe that using analytical modeling will help telecommunications' companies ehnance their business model and marketing strategies and further differentiate from competitors.
 
 
 
@@ -65,7 +65,7 @@ Considering what was already mentioned, our goals with this project are:
 
 ## A Priori Expectations
 
-We hypothesized different groups will have different churn rates and that that information might be useful for strategic decision making. We also hypothesize that it is possible to predict CLV based on demographic and product specific explanatory variables.
+We hypothesized different groups will have different churn rates and that that information might be useful for strategic decision making. A logistic regression model may be appropriate for predicting churn probability. We also hypothesize that a linear regression model may be useful for predicting CLV based on demographic and product specific explanatory variables.
 
 # Methods 
 
@@ -132,10 +132,10 @@ The implementation and transformations performed for each of the methods used ar
 ```{r, message = FALSE}
 method  <- c("Linear Regression", "Logistic Regression")
 response  <- c("CLTV value","Churn(Y/N)")
-implementation <- c("1. Splitting the data int training/testing datasets, 2. Run Full model, 3. Check for model assumptions 4. Transform the variables and remove outliers, 5. Variable selection models, 6. Performance measures in the testing dataset", "1. Splitting the data int training/testing datasets, 2. Run Full model, 3. Aggregating data for categorical variables, 4. Check for model assumptions 5. Transform the variables and remove outliers, 6. Variable selection models, 7. Performance measures in the testing dataset")
+implementation <- c("1. Prepare Data (remove outliers and multicollinearity), 2. Split data 75/25 into train and test sets, 3. Perform variable selection, 4. Check for model assumptions 5. Perform transformations to improve goodness of fit, 6. Interpret coefficients, 7. Create gradient boosted model, 8. Performance measures in the testing dataset", "1. Splitting the data int training/testing datasets, 2. Run Full model, 3. Aggregating data for categorical variables, 4. Check for model assumptions 5. Transform the variables and remove outliers, 6. Variable selection models, 7. Performance measures in the testing dataset")
 
 
-transformations <- c("1. Numerical variable to bins(categorical variable)", "1. Numerical variable to bins(categorical variable)")
+transformations <- c("1. Combine categorical variables exhibiting multicollinearity, 2. Logarithmic transformation of response, 3. Box-Cox transformation)", "1. Numerical variable to bins(categorical variable)")
 a <- as.data.frame(cbind(method, response, implementation, transformations))
  
 
@@ -238,7 +238,7 @@ kable(metrics.comp, format = "latex", booktabs = T, caption = "Comparison of Met
                 full_width = F)
 ```
 
-We can see from various prediction metrics that the linear regression model obtained from forward stepwise regression performs signficantly better than the out-of-the-box gradient boosted regression model. 
+We can see from various prediction metrics that the linear regression model obtained from forward stepwise regression performs signficantly better than an out-of-the-box gradient boosted regression model (gradient boosted regression further explained in the appendix). 
 
 ## Customer segmentation
 
@@ -247,11 +247,15 @@ We can see from various prediction metrics that the linear regression model obta
 # Discussion 
 ## Subject Matter Implications
 
-
+The implications of our project are very important to any companies looking to retain important customers, not just telecommunications companies. The framework for our Linear Regression model shows that regression can be used to predict customer lifetime value using whatever data a company may have about a particular customer. The Logistic Regression section shows that companies could also produce classification models to predict the probability of a customer leaving. Both of these pieces of information are valuable on their own, but combining them could add even more value to the company. For example, a company could use classification to determine which customers are most likely to churn, then sort those customers by lifetime value (found from the other model) to determine the high-priority customers to reach out to. This information helps the company focus its retention efforts and stay profitable because the most valuable customers are retained.
 
 ## Limitations and next steps
 
 ### Limitations:
+
+* The linearity and normality assumptions were somewhat violated in the linear regression model, even after logarithmic and box-cox transformations.
+
+* The hyperparameters for the gradient boosted regression model was not tuned; default values were used.
 
 * Not all the assumptions were met when doing the goodness of fit for logisitc regression. Namely, there were discrepancies from a normal distribution.
 
@@ -259,12 +263,16 @@ We can see from various prediction metrics that the linear regression model obta
 
 ## Next steps:
 
+* Try additional transformations to improve goodness of fit for linear regression model.
+
+* Spend more time finding models that fit well to the shape of our dataset.
+
 * Improve goodness of fit for logistic model.
 
 * Test different tunning techniques for the models.
 
 
-# Attachments
+# Appendix
 
 
 ```{r, fig.height=5}
@@ -308,12 +316,4 @@ ggplot_4 <- ggplot(dat, aes(y=`Churn Score`, x=`Phone Service`, color =`Phone Se
 
 ggarrange(ggplot_1,ggplot_2, ggplot_3, ggplot_4, nrow = 2, ncol =2)
 ```
-
-## Attachment I - Churn Rate 
-### 1. Full model 
-### 2. Model fit
-### 3. Variable transformation
-### 4. Re-running the model
-### 5. Variable selection
-### 6. Model selection
 
