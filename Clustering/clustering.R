@@ -1,37 +1,25 @@
----
-title: "Clustering analysis"
-author: "Marta Bras"
-date: "11/25/2019"
-output: html_document
----
+source("./Clustering/DataTransformationClustering.R")
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-source("DataTransformationClustering.R")
-```
-
-## R Markdown
-
-```{r}
 set.seed(1680) # for reproducibility
 
 library(dplyr) # for data cleaning
-library(ISLR) # for college dataset
 library(cluster) # for gower similarity and pam
 library(Rtsne) # for t-SNE plot
-```
 
-```{r}
+
 #removing NA
 dat.reduced_C <- na.omit(dat.reduced_C)
 dat.reduced_D <- dat.reduced_C[c(10,11,12,13,15,17, 30, 34)]
 dat.reduced_D$`Churn Value` = as.factor(dat.reduced_D$`Churn Value`)
 dat.reduced_D$Reason = as.factor(dat.reduced_D$Reason)
 
+
+
 gower_dist <- daisy(dat.reduced_D[, -7],
                     metric = "gower",
-                    )
+)
 summary(gower_dist)
+
 gower_mat <- as.matrix(gower_dist)
 dat.reduced_D[
   which(gower_mat == min(gower_mat[gower_mat != min(gower_mat)]),
@@ -43,9 +31,7 @@ dat.reduced_D[
 dat.reduced_D[
   which(gower_mat == max(gower_mat[gower_mat != max(gower_mat)]),
         arr.ind = TRUE)[1, ], ]
-```
-```{r}
-# Calculate silhouette width for many k using PAM
+
 
 sil_width <- c(NA)
 
@@ -66,10 +52,8 @@ plot(1:10, sil_width,
      ylab = "Silhouette Width")
 lines(1:10, sil_width)
 
-```
 
-```{r}
-pam_fit <- pam(gower_dist, diss = TRUE, k = 3)
+pam_fit <- pam(gower_dist, diss = TRUE, k = 4)
 
 pam_results <- dat.reduced_D %>%
   dplyr::select(-`Churn Value`) %>%
@@ -77,10 +61,8 @@ pam_results <- dat.reduced_D %>%
   group_by(cluster) %>%
   do(the_summary = summary(.))
 
-pam_results$the_summary
-```
+#pam_results$the_summary
 
-```{r}
 tsne_obj <- Rtsne(gower_dist, is_distance = TRUE)
 
 tsne_data <- tsne_obj$Y %>%
@@ -89,5 +71,5 @@ tsne_data <- tsne_obj$Y %>%
   mutate(cluster = factor(pam_fit$clustering),
          default = dat.reduced_D$`Churn Value`)
 
-```
-
+ggplot(aes(x = X, y = Y), data = tsne_data) +
+  geom_point(aes(color = cluster))

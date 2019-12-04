@@ -10,16 +10,12 @@ header-includes:
     - \usepackage{setspace}\doublespacing
 ---
 
-```{r setup}
-  library(knitr)
-  opts_knit$set(root.dir=normalizePath('../'))
-  opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
-```
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 source("LoadingData.R")
 source("CSS.R")
+source("./Logistic Regression/Model comparison.R")
+source("./Clustering/clustering.R")
 ```
 
 # Abstract
@@ -150,6 +146,40 @@ column_spec(c(2, 3, 4), width = c("1.9cm","8cm", "3.5cm"))
 
 ## Churn Rate - Insigths
 
+### Insigths from clustering
+
+```{r}
+ggplot(aes(x = X, y = Y), data = tsne_data) +
+  geom_point(aes(color = cluster))
+```
+
+```{r}
+pam_results$the_summary[[1]]
+```
+Cluster number one is comprised of young male with no partner or dependents, that mostly have fiber optic and that churn either because a competitor made a better offer (49% of the times) or because they had a bad experience with customer service (24%).
+
+```{r}
+pam_results$the_summary[[2]]
+```
+Cluster number two is comprised of young feamle with no partner or dependents, that mostly have fiber optic and that churn mostly because a competitor made a better offer (54% of the times).
+
+```{r}
+pam_results$the_summary[[3]]
+```
+
+Cluster number three is comprised of young feamle with partner but no dependents, that mostly have fiber optic and that churn mostly because of customer service (63% of the times).
+```{r}
+pam_results$the_summary[[4]]
+```
+Cluster number four is comprised of senior males with partner but no dependents, that mostly have fiber optic and that churn mostly because of product features (42% of the times).
+
+Understanding that different customer groups have different needs is important in defining the company's marketing strategy. 
+One insigth from the clustering analysis is that, even though customer service is important for all groups, female customers might be interested in a more personalized interaction than the other groups.
+
+Another important insigth from this clustering analysis is that the product features might be too complex for senior citizens that do not have dependents to help them successfully use the products. To address this limitation, the company can provide better assistance not only in the moment of sale, but throughout the product lifetime. Additionally, the company can also chose to develop a more basic option that is easier to use for this group of customers.
+
+### Insights from decision tree model
+
 ```{r}
 rpart.plot(fit, extra = 110)
 ```
@@ -157,7 +187,29 @@ rpart.plot(fit, extra = 110)
 
 ## Churn Rate - Predictive model 
 
+```{r}
+#ROC curve for different models
+plot(ROCRperf, col = 'darkred',lty = 2, lwd = 2, main = "ROC curve for different models", font.main=3, font.lab=3)
+plot(ROCRperf_DT, col = 'darkgreen',lty = 10, lwd = 2, add = TRUE)
+plot(ROCRperf_RF, col = 'orange', lty = 6, lwd = 2, add = TRUE)
+#plot(ROCRperf_bayes, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
+#plot(ROCRperf_svm, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
+plot(ROCRperf_kknn, col = "blue", lty= 8, lwd = 2, add = TRUE)
+legend(0.2,0.45, c('logistic','decistiontree','randomforest', "kknn"),lty=c(1,1),
+       lwd=c(2,2),col=c('darkred','darkgreen','orange', "blue"))
 
+```
+
+```{r}
+kable(table, digits = 0, format = "latex", booktabs = T, caption = "Results for a threshold of 0.2") %>%
+  kable_styling(latex_options = c("striped", "hold_position"),
+                full_width = F)
+
+kable(table_2, digits = 0, format = "latex", booktabs = T, caption = "Results for different thresholds") %>%
+  kable_styling(latex_options = c("striped", "hold_position"),
+                full_width = F)
+
+```
 
 ##  CLTV : Predictive model 
 
@@ -170,7 +222,24 @@ rpart.plot(fit, extra = 110)
 
 # Discussion 
 ## Subject Matter Implications
+
+
+
 ## Limitations and next steps
+
+### Limitations:
+
+* Not all the assumptions were met when doing the goodness of fit for logisitc regression. Namely, there were discrepancies from a normal distribution.
+
+* The time dedicated to prune the parameters in the random forest and kknn algorithms was limited. 
+
+## Next steps:
+
+* Improve goodness of fit for logistic model.
+
+* Test different tunning techniques for the models.
+
+
 # Attachments
 
 
