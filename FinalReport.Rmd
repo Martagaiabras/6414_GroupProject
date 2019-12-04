@@ -17,7 +17,6 @@ header-includes: \usepackage{setspace}\doublespacing\usepackage{float}\floatplac
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,fig.pos="h")
 source("LoadingData.R")
-source("CSS.R")
 source("./Logistic Regression/Model comparison.R")
 source("./Linear Regression/LinRegCode.R")
 source("./Clustering/clustering.R")
@@ -272,7 +271,15 @@ kable(table_2, digits = 3, format = "latex", booktabs = T, caption = "Accuracy f
                 full_width = F)
 ```
 
-We can see that the accuracy of random forest is higher for higher thresholds. This happens because
+We can see that the accuracy of random forest is higher for higher thresholds. This happens because for higher thresholds, random forest is predicting less false positives than the other models. 
+
+The choice of the best model is highly dependent on the implementation cost and on on the threshold level. In this case, we chose random forest as the best model for the following reasons:
+
+* We are assuming we will filter the data before targeting the customers so we would rather have higher false positives in order not lose potential good customers;
+
+* Goodness-of-fit for logistic model is not ideal;
+
+* Random forest is easier to implement than decision tree and normally does not overfit as much.
 
 
 
@@ -319,17 +326,14 @@ cust.data <- data.frame(
    prob_churn = c(0.65,0.1,0.75,0.9,0.55,0.25,0.2,0.56,0.86,0.6)
 )
 
-kable(cust.data, digits = 0, format = "latex", booktabs = T, caption = "Sample Customer Churn Prediction") %>%
-  kable_styling(latex_options = c("striped", "hold_position"),
-                full_width = F)
 ```
 
 
 ```{r}
-kable(cust.data, digits = 0, format = "latex", booktabs = T, caption = "Sample Customer Churn Prediction") %>%
+kable(cust.data, digits = 3, format = "latex", booktabs = T, caption = "Sample Customer Churn Prediction") %>%
   kable_styling(latex_options = c("striped", "hold_position"),
                 full_width = F)%>%
-  row_spec(c(1,3,4,9,10), bold = T, color = "black", background = "grey")
+  row_spec(c(1,3,4,9,10), bold = T, color = "red")
 
 ```
 
@@ -375,6 +379,8 @@ The implications of our project are very important to any companies looking to r
 * Not all the assumptions were met when doing the goodness of fit for logisitc regression. Namely, there were discrepancies from a normal distribution.
 
 * The time dedicated to prune the parameters in the random forest and kknn algorithms was limited. 
+
+* The choice of the best model to predict churn depends on a cost function defined by the company. The sensibility to different threshold values is subjective and involves decision making.
 
 ## Next steps:
 
@@ -435,27 +441,27 @@ ggarrange(ggplot_1,ggplot_2, ggplot_3, ggplot_4, nrow = 2, ncol =2)
 ## Goodness of Fit for Forward Stepwise Linear Regression Model
 
 ```{r}
-plot(bc.fitted.vals,rs,xlab="Fitted Values",ylab="Standardized Residuals",main="Standardized Residuals vs. Fitted Values")
+#plot(bc.fitted.vals,rs,xlab="Fitted Values",ylab="Standardized Residuals",main="Standardized Residuals vs. Fitted Values")
 ```
 
 This plot of the the standardized residuals vs the fitted values shows that the independence assumption likely holds, but the constant variance assumption is likely violated because there is a downward trend in the standardized residuals as the fitted values increase.
 
 ```{r, fig.height=8}
-par(mfrow=c(2,1))
+#par(mfrow=c(2,1))
 
-plot(dat.bc$`Tenure Months`,dat.bc$CLTV,xlab="Tenure Months",ylab="CLTV",main="CLTV vs. Tenure Months")
-plot(dat.bc$`Total Charges`,dat.bc$CLTV,xlab="Total Charges",ylab="CLTV",main="CLTV vs. Total Charges")
+#plot(dat.bc$`Tenure Months`,dat.bc$CLTV,xlab="Tenure Months",ylab="CLTV",main="CLTV vs. Tenure Months")
+#plot(dat.bc$`Total Charges`,dat.bc$CLTV,xlab="Total Charges",ylab="CLTV",main="CLTV vs. Total Charges")
 ```
 
 The two plots above show that the linearity assumption does not hold; the response values (CLTV) are dispersed widely when plotted against both Tenure Months and Total Charges. Note that CLTV values are so large here because of the Box-Cox Transformation.
 
 ```{r}
-qqnorm(rs)
-qqline(rs)
+#qqnorm(rs)
+#qqline(rs)
 ```
 
 ```{r}
-hist(resids.standard,xlab="Standardized Residuals",ylab="Frequency",main="Histogram of Standardized Residuals")
+#hist(resids.standard,xlab="Standardized Residuals",ylab="Frequency",main="Histogram of Standardized Residuals")
 ```
 
 The QQ-Plot and histogram of standardized residuals above show that the normality assumption may hold, but that the data has heavy tails. In addition, the histogram of standardized residuals shows a slight leftward skew.
