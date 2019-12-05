@@ -165,4 +165,9 @@ metrics.comp <- rbind(
 )
 
 colnames(metrics.comp) <- c("MSPE","MAE","MAPE","PM")
-metrics.comp
+
+# GOF stuff
+rs <- rstandard(model.bc)
+resids.standard <- rstandard(model.bc)
+
+bc.fitted.vals <- fitted(model.bc)
