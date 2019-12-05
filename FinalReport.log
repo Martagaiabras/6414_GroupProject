@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.11.23)  4 DEC 2019 18:17
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.11.23)  4 DEC 2019 20:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -760,24 +760,29 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
+
+Overfull \hbox (1.24533pt too wide) in paragraph at lines 293--293
+[]|\T1/lmr/m/n/10 Churn(Y/N)|  
+ []
+
+
+Overfull \hbox (1.24533pt too wide) in paragraph at lines 295--295
+[]|\T1/lmr/m/n/10 Churn(Y/N)|  
+ []
+
+
+Overfull \hbox (33.1365pt too wide) in paragraph at lines 287--298
+ [][] 
+ []
+
 [4pdfTeX warning (ext4): destination with the same identifier (name{table.1}) h
 as been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.281 \begin{verbatim}
-                      ]
-LaTeX Font Info:    Try loading font information for T1+lmtt on input line 281.
-
-(/Users/martabras/Library/TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
-File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
-Overfull \hbox (1.24533pt too wide) in paragraph at lines 297--297
-[]|\T1/lmr/m/n/10 Churn(Y/N)|  
- []
-
-
-Overfull \hbox (44.51744pt too wide) in paragraph at lines 291--300
+l.298 \end{table}
+                 ]
+Overfull \hbox (38.37836pt too wide) in paragraph at lines 304--311
  [][] 
  []
 
@@ -786,148 +791,159 @@ as been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.316 
+l.312 
       pdfTeX warning (ext4): destination with the same identifier (name{table.3
 }) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.316 
+l.312 
       ]
-<FinalReport_files/figure-latex/unnamed-chunk-4-1.pdf, id=89, 453.695pt x 313.1
+<FinalReport_files/figure-latex/unnamed-chunk-5-1.pdf, id=90, 453.695pt x 313.1
 7pt>
-File: FinalReport_files/figure-latex/unnamed-chunk-4-1.pdf Graphic file (type p
+File: FinalReport_files/figure-latex/unnamed-chunk-5-1.pdf Graphic file (type p
 df)
-<use FinalReport_files/figure-latex/unnamed-chunk-4-1.pdf>
-Package pdftex.def Info: FinalReport_files/figure-latex/unnamed-chunk-4-1.pdf  
-used on input line 322.
+<use FinalReport_files/figure-latex/unnamed-chunk-5-1.pdf>
+Package pdftex.def Info: FinalReport_files/figure-latex/unnamed-chunk-5-1.pdf  
+used on input line 333.
 (pdftex.def)             Requested size: 453.6939pt x 313.16922pt.
-[6 <./FinalReport_files/figure-latex/unnamed-chunk-4-1.pdf>]
-<FinalReport_files/figure-latex/unnamed-chunk-6-1.pdf, id=107, 415.5525pt x 315
-.1775pt>
-File: FinalReport_files/figure-latex/unnamed-chunk-6-1.pdf Graphic file (type p
-df)
-<use FinalReport_files/figure-latex/unnamed-chunk-6-1.pdf>
-Package pdftex.def Info: FinalReport_files/figure-latex/unnamed-chunk-6-1.pdf  
-used on input line 366.
-(pdftex.def)             Requested size: 415.5705pt x 315.19115pt.
-[7pdfTeX warning (ext4): destination with the same identifier (name{table.4}) h
+[6pdfTeX warning (ext4): destination with the same identifier (name{table.4}) h
 as been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.368 T
-       he most important insigths are:]
-LaTeX Font Info:    Try loading font information for TS1+lmr on input line 372.
+l.333 ...ure-latex/unnamed-chunk-5-1} \end{center}
+                                                  ] [7pdfTeX warning (ext4): de
+stination with the same identifier (name{table.5}) has been already used, dupli
+cate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.356 
+       <./FinalReport_files/figure-latex/unnamed-chunk-5-1.pdf>]
+<image.png, id=116, 1177.39874pt x 701.62125pt>
+File: image.png Graphic file (type png)
+<use image.png>
+Package pdftex.def Info: image.png  used on input line 377.
+(pdftex.def)             Requested size: 375.80515pt x 223.94527pt.
+LaTeX Font Info:    Try loading font information for TS1+lmr on input line 383.
 
 (/Users/martabras/Library/TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [8 <./FinalReport_files/figure-latex/unnamed-chunk-6-1.pdf>]
-<FinalReport_files/figure-latex/unnamed-chunk-7-1.pdf, id=138, 440.64626pt x 28
+) [8 <./image.png>]
+<FinalReport_files/figure-latex/unnamed-chunk-8-1.pdf, id=126, 440.64626pt x 28
 6.06876pt>
-File: FinalReport_files/figure-latex/unnamed-chunk-7-1.pdf Graphic file (type p
+File: FinalReport_files/figure-latex/unnamed-chunk-8-1.pdf Graphic file (type p
 df)
-<use FinalReport_files/figure-latex/unnamed-chunk-7-1.pdf>
-Package pdftex.def Info: FinalReport_files/figure-latex/unnamed-chunk-7-1.pdf  
-used on input line 404.
+<use FinalReport_files/figure-latex/unnamed-chunk-8-1.pdf>
+Package pdftex.def Info: FinalReport_files/figure-latex/unnamed-chunk-8-1.pdf  
+used on input line 415.
 (pdftex.def)             Requested size: 440.65189pt x 286.07242pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 404--415
+Underfull \hbox (badness 10000) in paragraph at lines 415--426
 [][] \T1/lmr/m/n/10 The
  []
 
-[9 <./FinalReport_files/figure-latex/unnamed-chunk-7-1.pdf>] [10pdfTeX warning 
-(ext4): destination with the same identifier (name{table.5}) has been already u
+[9 <./FinalReport_files/figure-latex/unnamed-chunk-8-1.pdf>] [10pdfTeX warning 
+(ext4): destination with the same identifier (name{table.6}) has been already u
 sed, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.524 
-      pdfTeX warning (ext4): destination with the same identifier (name{table.6
-}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.524 
+l.485 
       ] [11pdfTeX warning (ext4): destination with the same identifier (name{ta
 ble.7}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.577 
+l.548 
       pdfTeX warning (ext4): destination with the same identifier (name{table.8
 }) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.577 
+l.548 
       ] [12pdfTeX warning (ext4): destination with the same identifier (name{ta
 ble.9}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.619 
+l.608 
+      pdfTeX warning (ext4): destination with the same identifier (name{table.1
+0}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.608 
       ]
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[13pdfTeX warning (ext4): destination with the same identifier (name{table.10})
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[13pdfTeX warning (ext4): destination with the same identifier (name{table.11})
  has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.721 
-      pdfTeX warning (ext4): destination with the same identifier (name{table.1
-1}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.721 
-      pdfTeX warning (ext4): destination with the same identifier (name{table.1
-2}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.721 
+l.715 
       ] [14pdfTeX warning (ext4): destination with the same identifier (name{ta
-ble.13}) has been already used, duplicate ignored
+ble.12}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.748 \end{itemize}
-                   ]
-<FinalReport_files/figure-latex/unnamed-chunk-17-1.pdf, id=190, 337.26pt x 207.
-77625pt>
-File: FinalReport_files/figure-latex/unnamed-chunk-17-1.pdf Graphic file (type 
-pdf)
-<use FinalReport_files/figure-latex/unnamed-chunk-17-1.pdf>
-Package pdftex.def Info: FinalReport_files/figure-latex/unnamed-chunk-17-1.pdf 
- used on input line 772.
-(pdftex.def)             Requested size: 337.26431pt x 207.77888pt.
-<FinalReport_files/figure-latex/unnamed-chunk-18-1.pdf, id=191, 456.70625pt x 2
-80.04625pt>
+l.732   N
+         ot all the assumptions were met when doing the goodness of fit forpdfT
+eX warning (ext4): destination with the same identifier (name{table.13}) has be
+en already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.732   N
+         ot all the assumptions were met when doing the goodness of fit for]
+<FinalReport_files/figure-latex/unnamed-chunk-18-1.pdf, id=179, 447.6725pt x 30
+1.125pt>
 File: FinalReport_files/figure-latex/unnamed-chunk-18-1.pdf Graphic file (type 
 pdf)
 <use FinalReport_files/figure-latex/unnamed-chunk-18-1.pdf>
 Package pdftex.def Info: FinalReport_files/figure-latex/unnamed-chunk-18-1.pdf 
- used on input line 774.
-(pdftex.def)             Requested size: 456.71906pt x 280.0541pt.
-[15 <./FinalReport_files/figure-latex/unnamed-chunk-17-1.pdf>] [16 <./FinalRepo
-rt_files/figure-latex/unnamed-chunk-18-1.pdf>]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 811.
-[17]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 811.
+ used on input line 766.
+(pdftex.def)             Requested size: 447.68506pt x 301.13344pt.
+[15]
+<FinalReport_files/figure-latex/unnamed-chunk-19-1.pdf, id=186, 351.3125pt x 20
+4.765pt>
+File: FinalReport_files/figure-latex/unnamed-chunk-19-1.pdf Graphic file (type 
+pdf)
+<use FinalReport_files/figure-latex/unnamed-chunk-19-1.pdf>
+Package pdftex.def Info: FinalReport_files/figure-latex/unnamed-chunk-19-1.pdf 
+ used on input line 768.
+(pdftex.def)             Requested size: 351.33307pt x 204.77698pt.
+<FinalReport_files/figure-latex/unnamed-chunk-20-1.pdf, id=187, 453.695pt x 280
+.04625pt>
+File: FinalReport_files/figure-latex/unnamed-chunk-20-1.pdf Graphic file (type 
+pdf)
+<use FinalReport_files/figure-latex/unnamed-chunk-20-1.pdf>
+Package pdftex.def Info: FinalReport_files/figure-latex/unnamed-chunk-20-1.pdf 
+ used on input line 770.
+(pdftex.def)             Requested size: 453.6939pt x 280.04555pt.
+[16 <./FinalReport_files/figure-latex/unnamed-chunk-18-1.pdf> <./FinalReport_fi
+les/figure-latex/unnamed-chunk-19-1.pdf>] [17 <./FinalReport_files/figure-latex
+/unnamed-chunk-20-1.pdf>]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 810.
+[18]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 810.
 (./FinalReport.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 811.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 811.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 811.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 810.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 810.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 810.
  ) 
 Here is how much of TeX's memory you used:
- 12533 strings out of 494553
- 179368 string characters out of 6176379
- 259621 words of memory out of 5000000
- 15908 multiletter control sequences out of 15000+600000
- 42704 words of font info for 42 fonts, out of 8000000 for 9000
+ 12503 strings out of 494553
+ 178843 string characters out of 6176379
+ 260735 words of memory out of 5000000
+ 15878 multiletter control sequences out of 15000+600000
+ 42385 words of font info for 41 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  34i,11n,35p,784b,395s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/Users/martabras/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/U
@@ -940,12 +956,11 @@ as/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></Users/martabra
 s/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/martabras/
 Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></Users/martabras/Li
 brary/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></Users/martabras/Libra
-ry/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri12.pfb></Users/martabras/Librar
-y/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on FinalReport.pdf (17 pages, 353837 bytes).
+ry/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri12.pfb>
+Output written on FinalReport.pdf (18 pages, 532181 bytes).
 PDF statistics:
- 341 PDF objects out of 1000 (max. 8388607)
- 296 compressed objects within 3 object streams
- 83 named destinations out of 1000 (max. 500000)
- 194 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 345 PDF objects out of 1000 (max. 8388607)
+ 298 compressed objects within 3 object streams
+ 87 named destinations out of 1000 (max. 500000)
+ 207 words of extra memory for PDF output out of 10000 (max. 10000000)
 

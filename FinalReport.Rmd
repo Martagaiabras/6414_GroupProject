@@ -28,11 +28,11 @@ The telecommunications industry is facing a challenging future, with the emergen
 
 In a highly price sensitive market, customer service and product features play an important role. For telecommunication companies to better tailor their products to customer expectations, understanding the reasons for customer attrition is a crucial step.  In that sense, customer churn analysis is one of the vital measures for subscription-based business models such as telecom services and internet providers.  
 
-In this report, we developed a model to explore the reasons why a specific telecommunications company's customers churn. In our analysis, we were particularly interested in understanding differences between groups, and to leverage that information to suggest future customer segmentation strategies. We used this model to also predict which customers are likely to churn in the future.
+In this report, we developed a model to explore the reasons why a specific telecommunications company's customers churn. In our analysis, we were particularly interested in understanding differences between groups, and to leverage that information to suggest future customer segmentation strategies. We used modelling to also predict which customers are likely to churn in the future.
 
-Additionally, we use modelling to predict each customer's lifetime value (CLV), as a measure of a particular customer's net worth to the company, during his relationship with the company.
+Additionally, we use modelling to predict each customer's lifetime value (CLTV), as a measure of a particular customer's net worth to the company, during his relationship with the company.
 
-We argue that if a company is able to predict if a customer is likely to churn, while also being able to identify if the same customer is worth reatining (based on a predicted value for CLV), then the company can choose to increase engagement with the customer in order to retain him. 
+We argue that if a company is able to predict if a customer is likely to churn, while also being able to identify if the same customer is worth reatining (based on a predicted value for CLTV), then the company can choose to increase engagement with the customer in order to retain him. 
 
 Preserving "at risk" valuable customers, while leveraging on information about differences in groups to develop better segmentation strategies, can potentially help a telecommunication company differentiate from the competition and hence increase revenues in the long run.
 
@@ -43,11 +43,11 @@ Preserving "at risk" valuable customers, while leveraging on information about d
 
 Understanding customers' preferences is essential for any business, playing an even more important role when competition and price elasticity of demand is high. This is the case for the telecommunication industry, in which customers frequently change among telecom operators, resulting in high churn rates and competitive pressures for the companies. 
 
-Customer segmentation and targeting are marketing strategies that allow companies to differentiate by tailoring their products to different groups' preferences. In our analysis, we were interested in using modeling to understand how different groups churn and how different factors influence churn rate. We believe the information provided by our models can be used to support strategic marketing decisions of the company in the medium/long run. 
+Customer segmentation and targeting are marketing strategies that allow companies to differentiate by tailoring their products to different groups' preferences. In our analysis, we were interested in using modeling to understand why different groups churn and how different factors influence churn rate. We believe that the information provided by our models can be used to support strategic marketing decisions of the company in the medium/long run. 
 
-Another important aspect in strategic decision making is provided by the concept of CLV. Customer lifetime value is a prediction of the net profit of a particular customer during the future relationship with the company. In that sense, it is a good indicator of which customers are worth investing marketing efforts to retain them and which are not.In our analysis, we use modelling to predict the CLV for each customer. 
+Another important aspect in strategic decision making is provided by the concept of CLTV. Customer lifetime value is a prediction of the net profit of a particular customer during the future relationship with the company. In that sense, it is a good indicator of which customers are worth investing marketing efforts to retain and which are not. In our analysis, we use modelling to predict the CLTV of each customer. 
 
-We combine our predictive model for churn with our predictive model for CLV, to provide a tool for the company to proactively identify customers to target their marketing efforts, in an attempt to not lose them in the future. 
+We combine our predictive model for churn with our predictive model for CLTV, to provide a tool for the company to proactively identify customers to target their marketing efforts, in an attempt to not lose them in the future. 
 
 We believe that using analytical modeling will help telecommunications' companies ehnance their business model and marketing strategies and further differentiate from competitors.
 
@@ -57,16 +57,18 @@ We believe that using analytical modeling will help telecommunications' companie
 
 Considering what was already mentioned, our goals with this project are: 
 
-1. Building a predictive model for churn rate that best identifies which customers are likely to churn.
+1. Understanding which factors influence churn rate for different groups.
 
-2. Building a predictive model for CLTV that best identifies how much a customer is worth for the company and the factors that contribute most to CLTV.
+2. Building a predictive model for churn rate that best identifies which customers are likely to churn.
 
-3. Perform customer segmentation to identify high value customers that are likely to churn.
+3. Building a predictive model for CLTV that best identifies how much a customer is worth for the company and the factors that contribute most to CLTV.
+
+4. Perform customer segmentation to identify high value customers that are likely to churn.
 
 
 ## A Priori Expectations
 
-We hypothesized different groups will have different churn rates and that that information might be useful for strategic decision making. A logistic regression model may be appropriate for predicting churn probability. We also hypothesize that a linear regression model may be useful for predicting CLV based on demographic and product specific explanatory variables.
+We hypothesized different groups will have different churn rates and that that information might be useful for strategic decision making. A logistic regression model may be appropriate for predicting churn probability. We also hypothesize that a linear regression model may be useful for predicting CLTV based on demographic and product specific explanatory variables.
 
 # Methods 
 
@@ -97,7 +99,7 @@ kable(summary_table, digits = 0, format = "latex", booktabs = T, caption = "Over
                 full_width = F)
 ```
 
-From the customers, 5,174 have not churned (73.4%). We categorized the different reasons for churn that were provided in the feature "Churn Reason" in the database in 5 subcategories: competitors, customer service, produce features, price and others (see table 3). Interestingly, even though competitors and price play a big role, bad customer service was reported as being the second main reason for churn. Additionally, if we consider bad customer service and bad product features together, these two reasons had a more important role in customer churn than price and competition together. 
+From the customers, 5,174 have not churned (73.4%). We categorized the different reasons for churn that were provided in the feature "Churn Reason" in the database in 5 subcategories: competitors, customer service, produce features, price and others (see table 2). Interestingly, even though competitors and price play a big role, bad customer service was reported as being the second main reason for churn. Additionally, if we consider bad customer service and bad product features together, these two reasons had a more important role in customer churn than price and competition together. 
 
 ```{r, message = FALSE}
 summary_churn <- dat %>% group_by(`Churn Value`) %>%  
@@ -129,20 +131,37 @@ kable(summary_churn_2, digits = 0, format = "latex", booktabs = T, caption = "To
 ```
 
 ## Methods used 
-The implementation and transformations performed for each of the methods used are summarized in the table below.
-```{r, message = FALSE}
-method  <- c("Linear Regression", "Logistic Regression")
-response  <- c("CLTV value","Churn(Y/N)")
-implementation <- c("1. Prepare Data (remove outliers and multicollinearity), 2. Split data 75/25 into train and test sets, 3. Perform variable selection, 4. Check for model assumptions 5. Perform transformations to improve goodness of fit, 6. Interpret coefficients, 7. Create gradient boosted model, 8. Performance measures in the testing dataset", "1. Splitting the data int training/testing datasets, 2. Run Full model, 3. Aggregating data for categorical variables, 4. Check for model assumptions 5. Transform the variables and remove outliers, 6. Variable selection models, 7. Performance measures in the testing dataset")
+The implementation and transformations performed for each of the methods used are summarized in the tables below.
+```{r, message = FALSE, warning = FALSE}
+method  <- c("Clustering","Logistic Regression","KNN")
+response  <- c("Churn reason","Churn(Y/N)","Churn(Y/N)")
+implementation <- c("Calculate distance using Gower distance, 2. Choose a clustering algorithm - partitioning around medoids (PAM) algorithm, 3. Selecte of the number of clusters, 4. Interpret the clusters", "1. Split data 75/25 into train and test sets, 2. Run Full model, 3. Aggregate  data for categorical variables, 4. Check for model assumptions 5. Transform the variables and remove outliers, 6. Variable selection models, 7. Prediction on test dataset, 8. Computation of the confusion matrix for different threshold levels","1. Transform categorical variables to dummy variables, 2. Use train.kknn function available in package CAR with multiple kernels, a maximum of 30k and as probability, 3. Cross validation to find optimal k and kernel, 4. Predict on test dataset, 5. Compute of the confusion matrix for different threshold levels")
 
 
-transformations <- c("1. Combine categorical variables exhibiting multicollinearity, 2. Logarithmic transformation of response, 3. Box-Cox transformation)", "1. Numerical variable to bins(categorical variable)")
+transformations <- c("1. Transform categorical variables to dummy variables","1. Numerical variable to bins(categorical variable)", "1. Transformation of categorical variables to dummy variables")
 a <- as.data.frame(cbind(method, response, implementation, transformations))
  
 
-kable(a, digits =6, caption = "Methods") %>%
+kable(a, digits =6, format = "latex", caption = "Description of methods used for clustering and classification") %>%
+kable_styling(latex_options = c("striped", "HOLD_position"), full_width = FALSE) %>%
+column_spec(c(2, 3, 4), width = c("1.9cm","8cm", "3.1cm"))
+
+```
+
+```{r, message = FALSE, warning = FALSE}
+method  <- c("Linear Regression")
+response  <- c("CLTV value")
+implementation <- c("1. Prepare Data (remove outliers and multicollinearity), 2. Split data 75/25 into train and test sets, 3. Perform variable selection, 4. Check for model assumptions 5. Perform transformations to improve goodness of fit, 6. Interpret coefficients, 7. Create gradient boosted model, 8. Performance measures in the testing dataset")
+
+
+transformations <- c("1. Combine categorical variables exhibiting multicollinearity, 2. Logarithmic transformation of response, 3. Box-Cox transformation")
+a <- as.data.frame(cbind(method, response, implementation, transformations))
+ 
+
+kable(a, digits =6, format = "latex", caption = "Description of methods used for regression") %>%
 kable_styling(latex_options = c("striped", "HOLD_position"), full_width = FALSE) %>%
 column_spec(c(2, 3, 4), width = c("1.9cm","8cm", "3.5cm"))
+
 ```
 
 
@@ -209,8 +228,10 @@ Another important insigth from this clustering analysis is that the product feat
 To understand how the different probabilities of churn change for different customer and product features, we developed a decision tree model. 
 The results are presented below. The first number in the node correspondes to the classification of the node (0 if not churn and 1 if churn). The second number in the node correspondes to the % of the customers on the other classification. The third value in the node measures the total % of customers that are included in that node. 
 
-```{r, fig.height=5}
-rpart.plot(fit, box.palette="RdBu", shadow.col="gray", nn=TRUE, cex = 0.6)
+```{r out.width = "80%", fig.align = "center"}
+#rpart.plot(fit, box.palette="RdBu", shadow.col="gray", nn=TRUE, cex = 1)
+knitr::include_graphics("image")
+
 ```
 
 The most important insigths are: 
@@ -251,7 +272,7 @@ or
 
 * Would we rather not identify some of the customers that are likely to churn in order to not incurr in uneccessary costs?
 
-In our analysis we are combining a classification model with a model that computes CLV. This allows us to filter which customers to target before actually incurring the costs associated with the extra efforts to retain the customers. 
+In our analysis we are combining a classification model with a model that computes CLTV. This allows us to filter which customers to target before actually incurring the costs associated with the extra efforts to retain the customers. 
 
 For that reason, we started by using a small threshold of 0.2%. This threshold implies that we are willing to take a lot of false positives, in order to have a high sensitivity rate (TP/(FN+TP)). Because we are getting a lot of false positives, our specificity (TN/(TN+FP)) will be low and our accuracy (TN+TP)/(TN+TP+FN+FP) will also be low.
 
@@ -263,7 +284,7 @@ kable(table, digits = 3, format = "latex", booktabs = T, caption = "Results for 
 
 From the table, we can conclude random forest performs better for a low threshold meaning that it will be the best model predicting true positives. On the ohter hand it is the worst model at predicting false positives which makes it the worst model in terms of accuracy.
 
-It is not just the cost of acquiring a customer that is relevant for the company. There are other costs associated with the process, such as the computational cost of predicting CLV for each customer that is likely to churn. For that, we decided to measure the sensibility of the models to other threshold values - 0.5 and 0.8. The accuracy of the models for these levels are summarized in the table below.
+It is not just the cost of acquiring a customer that is relevant for the company. There are other costs associated with the process, such as the computational cost of predicting CLTV for each customer that is likely to churn. For that, we decided to measure the sensibility of the models to other threshold values - 0.5 and 0.8. The accuracy of the models for these levels are summarized in the table below.
 
 ```{r}
 kable(table_2, digits = 3, format = "latex", booktabs = T, caption = "Accuracy for different thresholds") %>%
@@ -318,7 +339,7 @@ The first step in this direction will be to identify customers that are likely t
 
 The choice for this threshold is subjective. A lower threshold may give a higher number of false positives, which could be beneficial for the company to increase engagement with a larger number of customers that are even less likely to churn. This strategy would be helpful for companies that are expecting high competition and is willing to spend more on customer retention. Whereas, a higher threshold is expected to give a higher number of false negatives, where the company would miss to identify certain customers who are likely to churn. This strategy would be better if a company is trying to curb down retention expenses.
 
-Once a customer segmentation is obtained based if a customer is likely to churn or not, the second step is to segment them by their customer lifetime value (CLV). This can be achieved by predicting their customer lifetime value (CLV) using the linear regression model discussed above. The list of customers that are likely to churn can then be sorted by their predicted customer lifetime value (CLV). Based on the retention program and it's associated costs, the telecommunication company can choose to increase engagement with a customer that is likely to churn based on their predicted customer lifetime value. Ideally, high-value customers should be focused on first before other low-value customers.
+Once a customer segmentation is obtained based if a customer is likely to churn or not, the second step is to segment them by their customer lifetime value (CLTV). This can be achieved by predicting their customer lifetime value (CLTV) using the linear regression model discussed above. The list of customers that are likely to churn can then be sorted by their predicted customer lifetime value (CLTV). Based on the retention program and it's associated costs, the telecommunication company can choose to increase engagement with a customer that is likely to churn based on their predicted customer lifetime value. Ideally, high-value customers should be focused on first before other low-value customers.
 
 ```{r}
 cust.data <- data.frame(
@@ -342,7 +363,7 @@ kable(cust.data, digits = 3, format = "latex", booktabs = T, caption = "Sample C
 filtered.cust.data <- data.frame(
    cust_id = c(1,3,4,9,10), 
    prob_churn = c(0.65,0.75,0.9,0.86,0.6),
-   CLV = c(4832,5789,2915,3022,2454)
+   CLTV = c(4832,5789,2915,3022,2454)
 )
 
 kable(filtered.cust.data, digits = 0, format = "latex", booktabs = T, caption = "Sample Customer Churn Prediction") %>%
@@ -354,7 +375,7 @@ kable(filtered.cust.data, digits = 0, format = "latex", booktabs = T, caption = 
 sorted.filtered.cust.data <- data.frame(
    cust_id = c(3,1,9,4,10), 
    prob_churn = c(0.65,0.75,0.9,0.86,0.6),
-   CLV = c(5789,4832,3022,2915,2454)
+   CLTV = c(5789,4832,3022,2915,2454)
 )
 
 kable(sorted.filtered.cust.data, digits = 0, format = "latex", booktabs = T, caption = "Sample Customer Churn Prediction") %>%
@@ -396,39 +417,57 @@ The implications of our project are very important to any companies looking to r
 # Appendix
 
 ## Exploratory Data Anaysis
+```{r}
+par(mfrow=c(1,3))
+tb_obgender = xtabs(~dat.reduced_2$`Churn Value`+dat.reduced_2$Gender)
+barplot(prop.table(tb_obgender),axes=T,space=0.3,  cex.axis=1.5, cex.names=1.5,
+        xlab="Proportion of Churn vs not churn",
+        horiz=T, col=c("blue","brown"),main="Churn by gender")
+
+tb_citizen = xtabs(~dat.reduced_2$`Churn Value`+dat.reduced_2$`Senior Citizen`)
+barplot(prop.table(tb_citizen),axes=T,space=0.3, cex.axis=1.5, cex.names=1.5,
+        xlab="Proportion of Churn vs not churn",
+        horiz=T, col=c("blue","brown"),main="Churn by Senior citizen (Y/N)")
+
+
+tb_Dependents = xtabs(~dat.reduced_2$`Churn Value`+ dat.reduced_2$Dependents)
+barplot(prop.table(tb_Dependents),axes=T,space=0.3,cex.axis=1.5, cex.names=1.5,
+        xlab="Proportion of Churn vs not churn",
+        horiz=T, col=c("blue","brown"),main="Churn by dependents (Y/N)")
+
+```
+
+
 ```{r, fig.height=3,fig.width=5,fig.align='center'}
-ggplot(dat, aes(x=`Churn Score`)) + 
+ggplot(dat, aes(x=`CLTV`)) + 
   geom_histogram(binwidth = 5, fill = "grey") +
-  ggtitle("Histogram of Churn Score") +
-  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) +
-  theme(plot.title = element_text(size=11))  
+  ggtitle("Histogram of CLTV")
 ```
 
 
 ```{r, fig.height=4}
-ggplot_1 <- ggplot(dat, aes(y=`Churn Score`, x= Gender, color = Gender,  palette = "jco")) +
+ggplot_1 <- ggplot(dat, aes(y=CLTV, x= Gender, color = Gender,  palette = "jco")) +
   geom_boxplot() +
   ggtitle("Boxplot of Gender") +
   theme_bw() + 
   theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(),  axis.title.x =element_text(size=8),  axis.title.y = element_text(size=8)) +
   theme(plot.title = element_text(size=8)) 
 
-ggplot_2 <- ggplot(dat, aes(y=`Churn Score`, x= `Senior Citizen`, color = `Senior Citizen`,  palette = "jco")) +
+ggplot_2 <- ggplot(dat, aes(y=CLTV, x= `Senior Citizen`, color = `Senior Citizen`,  palette = "jco")) +
   geom_boxplot() +
   ggtitle("Boxplot of seniority") +
   theme_bw() + 
   theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(),  axis.title.x =element_text(size=8),  axis.title.y = element_text(size=8)) +
   theme(plot.title = element_text(size=8)) 
 
-ggplot_3 <- ggplot(dat, aes(y=`Churn Score`, x= Dependents, color = Dependents ,  palette = "jco")) +
+ggplot_3 <- ggplot(dat, aes(y=CLTV, x= Dependents, color = Dependents ,  palette = "jco")) +
   geom_boxplot() +
   ggtitle("Boxplot of dependents") +
   theme_bw() + 
   theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(),  axis.title.x =element_text(size=8),  axis.title.y = element_text(size=8)) +
   theme(plot.title = element_text(size=8)) 
 
-ggplot_4 <- ggplot(dat, aes(y=`Churn Score`, x=`Phone Service`, color =`Phone Service`,  palette = "jco")) +
+ggplot_4 <- ggplot(dat, aes(y=CLTV, x=`Phone Service`, color =`Phone Service`,  palette = "jco")) +
   geom_boxplot() +
   ggtitle("Boxplot of phone service") +
   theme_bw() + 
@@ -437,6 +476,7 @@ ggplot_4 <- ggplot(dat, aes(y=`Churn Score`, x=`Phone Service`, color =`Phone Se
 
 ggarrange(ggplot_1,ggplot_2, ggplot_3, ggplot_4, nrow = 2, ncol =2)
 ```
+## Goodness of Fit for Logistic regression
 
 ## Goodness of Fit for Forward Stepwise Linear Regression Model
 
@@ -466,8 +506,14 @@ The two plots above show that the linearity assumption does not hold; the respon
 
 The QQ-Plot and histogram of standardized residuals above show that the normality assumption may hold, but that the data has heavy tails. In addition, the histogram of standardized residuals shows a slight leftward skew.
 
+## Clustering procedure
+
+
+
+
 ## Gradient Boosted Models
 
 We did not go over boosted models in class, but they can be sometimes useful when dealing with complex non-linear patterns in data. Boosted regression trees partition data at each split and determine the residuals for each partition. The children of each branch will be fitted to those residuals and successive splits aim to find partitions that further reduce error. However, this class of models is black-box, so we lose interpretability. In addition, these models can sometimes severely overfit to the training data, which could explain some of the poor prediction results we got from the boosted tree in our analysis.
 
 Source: StatSoft, Inc. (2013). Electronic Statistics Textbook. Tulsa, OK: StatSoft. WEB: http://www.statsoft.com/textbook/.
+

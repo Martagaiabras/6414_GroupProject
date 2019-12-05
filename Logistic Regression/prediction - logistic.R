@@ -45,7 +45,7 @@ ROCRperf = performance(ROCRpred, "tpr", "fpr")
 
 ##3. Plot ROC curve
 
-#plot(ROCRperf, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
+plot(ROCRperf, colorize=TRUE, print.cutoffs.at=seq(0,1,by=0.1), text.adj=c(-0.2,1.7))
 #With this model we predicted churn in (420)/(420+47) = 90% of the cases. 
 
 ##lasso model 
