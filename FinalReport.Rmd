@@ -153,12 +153,13 @@ column_spec(c(2, 3, 4), width = c("1.9cm","8cm", "3.1cm"))
 For more information on the clustering model, please refer to attachment 6.4 - Clustering procedure.
 
 ```{r, message = FALSE, warning = FALSE}
-Method  <- c("Linear Regression")
-Response  <- c("CLTV value")
-Implementation <- c("1. Prepare Data (remove outliers and multicollinearity), 2. Split data 75/25 into train and test sets, 3. Perform variable selection, 4. Check for model assumptions 5. Perform transformations to improve goodness of fit, 6. Interpret coefficients, 7. Create gradient boosted model, 8. Performance measures in the testing dataset")
+Method  <- c("Linear Regression", "Decision Tree","Random Forest")
+Response  <- c("CLTV value","Churn(Y/N)","Churn(Y/N)")
+Implementation <- c("1. Prepare Data (remove outliers and multicollinearity), 2. Split data 75/25 into train and test sets, 3. Perform variable selection, 4. Check for model assumptions 5. Perform transformations to improve goodness of fit, 6. Interpret coefficients, 7. Create gradient boosted model, 8. Performance measures in the testing dataset", "1. Split data 75/25 into train and test sets, 2. Build a decision tree to predict churn on training data, 3. Cross validation to find
+optimal tree length, 4. Prune tree to the optimal tree length for prediction, 5. Predict on test dataset, 6. Compute the confusion matrix for different threshold levels","1. Create a random forest classifier to predict churn on the transformed data, 2. Use the random forest to make predictions and to obtain performace measures such as accuracy and out-of-bag error estimate.")
 
 
-Transformations <- c("1. Combine categorical variables exhibiting multicollinearity, 2. Logarithmic transformation of response, 3. Box-Cox transformation")
+Transformations <- c("1. Combine categorical variables exhibiting multicollinearity, 2. Logarithmic transformation of response, 3. Box-Cox transformation", "1. Transformation of categorical variables to dummy variables","1. Transformation of categorical variables to dummy variables")
 a <- as.data.frame(cbind(Method, Response, Implementation, Transformations))
  
 
@@ -340,52 +341,40 @@ We can see from various prediction metrics that the linear regression model obta
 
 The goal of the telecommunication company to retain high-value customers can be achieved through customer segmentation. Based on the approach mentioned earlier, the telecommunication company should focus to increase engagement with customers that have the highest chances of churning, and also have the highest customer lifetime value.
 
-The first step in this direction will be to identify customers that are likely to churn using the churn prediction model (discussed above). This will provide the probability that a particular customer may churn for every active customer. Sorting customers based on their probability to churn the company can filter customers that are most likely to churn based on a chosen threshold. 
+The first step in this direction will be to identify customers that are likely to churn using the churn prediction classification model (discussed in section 4.2). This will provide the probability that a particular customer may churn for every active customer. Customers can be sorted based on their probability to churn to filter customers that are most likely to churn based on a chosen threshold. 
 
 The choice for this threshold is subjective. A lower threshold may give a higher number of false positives, which could be beneficial for the company to increase engagement with a larger number of customers that are even less likely to churn. This strategy would be helpful for companies that are expecting high competition and is willing to spend more on customer retention. Whereas, a higher threshold is expected to give a higher number of false negatives, where the company would miss to identify certain customers who are likely to churn. This strategy would be better if a company is trying to curb down retention expenses.
 
-Once a customer segmentation is obtained based if a customer is likely to churn or not, the second step is to segment them by their customer lifetime value (CLTV). This can be achieved by predicting their customer lifetime value (CLTV) using the linear regression model discussed above. The list of customers that are likely to churn can then be sorted by their predicted customer lifetime value (CLTV). Based on the retention program and it's associated costs, the telecommunication company can choose to increase engagement with a customer that is likely to churn based on their predicted customer lifetime value. Ideally, high-value customers should be focused on first before other low-value customers.
+For demonstration, consider a customer base of 10 users with the following churn probabilities. Customers that are likely to churn can be identified based on a particular threshold (0.6 in this case) and are highlighted in red in Table 11 below. 
 
 ```{r}
 cust.data <- data.frame(
    cust_id = c(1:10), 
    prob_churn = c(0.65,0.1,0.75,0.9,0.55,0.25,0.2,0.56,0.86,0.6)
 )
-
 ```
-
 
 ```{r}
 kable(cust.data, digits = 3, format = "latex", booktabs = T, caption = "Sample Customer Churn Prediction") %>%
   kable_styling(latex_options = c("striped", "hold_position"),
                 full_width = F)%>%
   row_spec(c(1,3,4,9,10), bold = T, color = "red")
-
 ```
 
+Once a customer segmentation is obtained based if a customer is likely to churn or not, the second step is to segment them by their customer lifetime value (CLTV). This can be achieved by predicting their customer lifetime value (CLTV) using the linear regression model (discussed in section 4.3). The list of customers that are likely to churn can then be sorted by their predicted customer lifetime value (CLTV). Based on the retention program and it's associated costs, the telecommunication company can choose to increase engagement with a customer that is likely to churn based on their predicted customer lifetime value. Ideally, high-value customers should be focused on first before other low-value customers.
+
+Continuing the demonstration for a sample customer base in Table 11, the customer lifetime value (CLTV) is predicted for every customer that is likely to churn. The customers are then sorted based on their customer lifetime value (Table 12). In a hypothetical scenario that a company only has a budget to retain 3 customers, based on the table below, customers 3, 1 and 9 will be chosen for higher customer engagement towards retention.
 
 ```{r}
 filtered.cust.data <- data.frame(
-   cust_id = c(1,3,4,9,10), 
-   prob_churn = c(0.65,0.75,0.9,0.86,0.6),
-   CLTV = c(4832,5789,2915,3022,2454)
-)
-
-kable(filtered.cust.data, digits = 0, format = "latex", booktabs = T, caption = "Sample Customer Churn Prediction") %>%
-  kable_styling(latex_options = c("striped", "hold_position"),
-                full_width = F)
-```
-
-```{r}
-sorted.filtered.cust.data <- data.frame(
    cust_id = c(3,1,9,4,10), 
-   prob_churn = c(0.65,0.75,0.9,0.86,0.6),
+   prob_churn = c(0.75,0.65,0.86,0.9,0.6),
    CLTV = c(5789,4832,3022,2915,2454)
 )
 
-#kable(sorted.filtered.cust.data, digits = 0, format = "latex", booktabs = T, caption = "Sample Customer Churn Prediction") %>%
-  #kable_styling(latex_options = c("striped", "hold_position"),
-                #full_width = F)
+kable(filtered.cust.data, digits = 3, format = "latex", booktabs = T, caption = "Customers likely to churn sorted by customer lifetime value (CLTV)") %>%
+  kable_styling(latex_options = c("striped", "hold_position"),
+                full_width = F)
 ```
 
 
