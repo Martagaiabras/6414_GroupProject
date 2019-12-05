@@ -1,0 +1,410 @@
+---
+title: "Aggregated model"
+author: "Marta Bras"
+date: "11/25/2019"
+output: html_document
+---
+```{r setup}
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```
+
+```{r, include=FALSE}
+source("./Logistic Regression/DataTransformation.R")
+```
+
+
+# Aggregating data  - Aggregating by all categorical variables with tenure as categorical with bins defined on data transformation
+
+
+```{r}
+dat.reduced_3$`Churn Value` = as.numeric(dat.reduced_3$`Churn Value`)
+
+
+obdata.agg.n = aggregate(`Churn Value`~ . , data = dat.reduced_3, FUN=length)
+
+
+obdata.agg.y = aggregate(`Churn Value`~ . , data = dat.reduced_3, FUN=sum)
+
+
+data <- cbind(obdata.agg.n, obdata.agg.y$`Churn Value`)
+
+data <- data %>% rename_at(20,~"Total")
+
+## Fitting the model
+
+model.agg = glm(cbind(`Churn Value`,Total-`Churn Value`)~ .,
+                data = data,family=binomial)
+
+## summary the model
+summary(model.agg)
+```
+
+
+
+## Goodness of fit 1
+
+```{r}
+## Test for overall regression
+gstat = model.agg$null.deviance - deviance(model.agg)
+cbind(gstat, 1-pchisq(gstat,length(coef(model.agg))-1))
+```
+
+The mdoel is not a good fit.
+
+
+```{r}
+## Test for GOF: Using deviance residuals
+deviances2 = residuals(model.agg,type="deviance")
+dev.tvalue = sum(deviances2^2)
+c(dev.tvalue, 1-pchisq(dev.tvalue,40))
+#OR
+c(deviance(model.agg), 1-pchisq(deviance(model.agg),40))
+
+## Residual Analysis
+res = resid(model.agg,type="deviance")
+par(mfrow=c(2,2))
+boxplot(res~Gender,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Senior Citizen`,xlab="Senior citizen",ylab = "Std residuals",data = data)
+boxplot(res~Partner,xlab="Partner",ylab = "Std residuals",data = data)
+boxplot(res~Dependents,xlab="Dependents",ylab = "Std residuals",data = data)
+boxplot(res~`Phone Service`,xlab="Phone service",ylab = "Std residuals",data = data)
+boxplot(res~`Multiple Lines`,xlab="Multiple lines",ylab = "Std residuals",data = data)
+boxplot(res~`Internet Service`,xlab="Internet service",ylab = "Std residuals",data = data)
+boxplot(res~Tenure,xlab="Tenure",ylab = "Std residuals",data = data)
+
+
+qqnorm(res, ylab="Std residuals")
+qqline(res,col="blue",lwd=2)
+hist(res,10,xlab="Std residuals", main="")
+```
+
+It is not a good fit.  Dependents, internet service and tenure have an unequal distribution of residuals.
+
+```{r}
+#variable importance
+library(caret)
+library(pscl)
+caret::varImp(model.agg) 
+pscl::pR2(model.agg)["McFadden"]
+```
+
+
+## Improving the fit - Removing outliers
+
+```{r}
+cooksd <- cooks.distance(model.agg)
+plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+
+abline(h = 4*mean(cooksd, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""), col="red")  # add labels
+```
+
+
+```{r}
+#4/n = 4/5186
+length(data$Gender)
+
+a = which(cook > 0.0007713074)
+
+newdata = data[-a,]
+```
+
+
+
+# Aggregating data  - Aggregating by all categorical variables with tenure as categorical with bins defined on data transformation and without outliers as higher than 4/n
+
+```{r}
+model.agg_2 = glm(cbind(`Churn Value`,Total-`Churn Value`)~ .,
+                data = newdata,family=binomial)
+  summary(model.agg_2)
+
+```
+
+
+
+
+## Goodness of fit 2
+
+```{r}
+## Test for overall regression
+gstat = model.agg_2$null.deviance - deviance(model.agg_2)
+cbind(gstat, 1-pchisq(gstat,length(coef(model.agg_2))-1))
+```
+
+Not a good fi
+
+```{r}
+## Test for GOF: Using deviance residuals
+deviances2 = residuals(model.agg_2,type="deviance")
+dev.tvalue = sum(deviances2^2)
+c(dev.tvalue, 1-pchisq(dev.tvalue,40))
+#OR
+c(deviance(model.agg_2), 1-pchisq(deviance(model.agg_2),40))
+
+## Residual Analysis
+res = resid(model.agg_2,type="deviance")
+par(mfrow=c(2,2))
+boxplot(res~Gender,xlab="Gender",ylab = "Std residuals",data = newdata)
+boxplot(res~`Senior Citizen`,xlab="Senior citizen",ylab = "Std residuals",data = newdata)
+boxplot(res~Partner,xlab="Partner",ylab = "Std residuals",data = newdata)
+boxplot(res~Dependents,xlab="Dependents",ylab = "Std residuals",data = newdata)
+boxplot(res~`Phone Service`,xlab="Phone service",ylab = "Std residuals",data = newdata)
+boxplot(res~`Multiple Lines`,xlab="Multiple lines",ylab = "Std residuals",data = newdata)
+boxplot(res~`Internet Service`,xlab="Internet service",ylab = "Std residuals",data = newdata)
+boxplot(res~Tenure,xlab="Tenure",ylab = "Std residuals",data = newdata)
+
+qqnorm(res, ylab="Std residuals")
+qqline(res,col="blue",lwd=2)
+hist(res,10,xlab="Std residuals", main="")
+```
+
+Not normal and from the histograms we can see not a good fit. 
+
+# Aggregating data  - Aggregating by all categorical variables with tenure as categorical with bins defined on data transformation and without outliers as higher than 4/n and removing tenure, dependents and multiple lines
+
+```{r}
+#removing tenure
+drop <- c("Tenure", "`Internet Service`", "`Multiple Lines`")
+newdata_2 = newdata[,!(names(newdata) %in% drop)]
+
+```
+
+```{r}
+model.agg_3 = glm(cbind(`Churn Value`,Total-`Churn Value`)~ .,
+                data = newdata_2,family=binomial)
+summary(model.agg_3)
+
+```
+
+
+
+
+## Goodness of fit 2
+
+```{r}
+## Test for overall regression
+gstat = model.agg_3$null.deviance - deviance(model.agg_3)
+cbind(gstat, 1-pchisq(gstat,length(coef(model.agg_3))-1))
+```
+
+
+```{r}
+## Test for GOF: Using deviance residuals
+deviances2 = residuals(model.agg_3,type="deviance")
+dev.tvalue = sum(deviances2^2)
+c(dev.tvalue, 1-pchisq(dev.tvalue,40))
+#OR
+c(deviance(model.agg_2), 1-pchisq(deviance(model.agg_2),40))
+
+## Residual Analysis
+res = resid(model.agg_3,type="deviance")
+par(mfrow=c(2,2))
+boxplot(res~Gender,xlab="Age Group",ylab = "Std residuals",data = newdata_2)
+boxplot(res~`Senior Citizen`,xlab="Gender",ylab = "Std residuals",data = newdata_2)
+boxplot(res~Partner,xlab="Gender",ylab = "Std residuals",data = newdata_2)
+#boxplot(res~Dependents,xlab="Gender",ylab = "Std residuals",data = newdata_2)
+boxplot(res~`Phone Service`,xlab="Gender",ylab = "Std residuals",data = newdata_2)
+boxplot(res~`Multiple Lines`,xlab="Gender",ylab = "Std residuals",data = newdata_2)
+boxplot(res~`Internet Service`,xlab="Gender",ylab = "Std residuals",data = newdata_2)
+
+
+
+qqnorm(res, ylab="Std residuals")
+qqline(res,col="blue",lwd=2)
+hist(res,10,xlab="Std residuals", main="")
+```
+
+## checking outliers again
+```{r}
+cooksd <- cooks.distance(model.agg_3)
+plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+
+abline(h = 4*mean(cooksd, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""), col="red")  # add labels
+```
+
+## removing outliers
+```{r}
+#4/n = 4/4870
+length(newdata_2$Gender)
+
+a = which(cook > 0.0008213552)
+newdata_3 = newdata_2[-a,]
+```
+
+
+## running again with no outleirs
+```{r}
+model.agg_4 = glm(cbind(`Churn Value`,Total-`Churn Value`)~ .,
+                data = newdata_3,family=binomial)
+summary(model.agg_4)
+
+```
+
+
+
+
+## Goodness of fit 2
+
+```{r}
+## Test for overall regression
+gstat = model.agg_4$null.deviance - deviance(model.agg_4)
+cbind(gstat, 1-pchisq(gstat,length(coef(model.agg_4))-1))
+```
+
+
+```{r}
+## Test for GOF: Using deviance residuals
+deviances2 = residuals(model.agg_4,type="deviance")
+dev.tvalue = sum(deviances2^2)
+c(dev.tvalue, 1-pchisq(dev.tvalue,40))
+#OR
+c(deviance(model.agg_4), 1-pchisq(deviance(model.agg_4),40))
+
+## Residual Analysis
+res = resid(model.agg_4,type="deviance")
+par(mfrow=c(2,2))
+boxplot(res~Gender,xlab="Age Group",ylab = "Std residuals",data = newdata_3)
+boxplot(res~`Senior Citizen`,xlab="Gender",ylab = "Std residuals",data = newdata_3)
+boxplot(res~Partner,xlab="Gender",ylab = "Std residuals",data = newdata_3)
+#boxplot(res~Dependents,xlab="Gender",ylab = "Std residuals",data = newdata_2)
+boxplot(res~`Phone Service`,xlab="Gender",ylab = "Std residuals",data = newdata_3)
+boxplot(res~`Multiple Lines`,xlab="Gender",ylab = "Std residuals",data = newdata_3)
+boxplot(res~`Internet Service`,xlab="Gender",ylab = "Std residuals",data = newdata_3)
+
+
+
+qqnorm(res, ylab="Std residuals")
+qqline(res,col="blue",lwd=2)
+hist(res,10,xlab="Std residuals", main="")
+```
+
+Still not a good fit
+
+
+
+
+
+# Step model 
+```{r}
+#both directions step model
+step.model <- stepAIC(model.agg_4, trace=0)
+step.model$anova
+```
+
+
+```{r}
+model.agg_5 = glm(cbind(`Churn Value`,Total-`Churn Value`)~Partner + `Internet Service` + 
+    `Online Security` + `Online Backup` + `Tech Support` + `Streaming TV` + 
+    `Streaming Movies` + Contract + `Paperless Billing` + `Payment Method`, data = newdata_3,family=binomial)
+summary(model.agg_5)
+
+```
+
+
+## Goodness of fit 2
+
+```{r}
+## Test for overall regression
+gstat = model.agg_5$null.deviance - deviance(model.agg_5)
+cbind(gstat, 1-pchisq(gstat,length(coef(model.agg_5))-1))
+```
+
+
+```{r}
+## Test for GOF: Using deviance residuals
+deviances2 = residuals(model.agg_5,type="deviance")
+dev.tvalue = sum(deviances2^2)
+c(dev.tvalue, 1-pchisq(dev.tvalue,40))
+#OR
+c(deviance(model.agg_4), 1-pchisq(deviance(model.agg_4),40))
+
+## Residual Analysis
+res = resid(model.agg_4,type="deviance")
+par(mfrow=c(2,2))
+boxplot(res~Gender,xlab="Age Group",ylab = "Std residuals",data = newdata_3)
+boxplot(res~`Senior Citizen`,xlab="Gender",ylab = "Std residuals",data = newdata_3)
+boxplot(res~Partner,xlab="Gender",ylab = "Std residuals",data = newdata_3)
+#boxplot(res~Dependents,xlab="Gender",ylab = "Std residuals",data = newdata_2)
+boxplot(res~`Phone Service`,xlab="Gender",ylab = "Std residuals",data = newdata_3)
+boxplot(res~`Multiple Lines`,xlab="Gender",ylab = "Std residuals",data = newdata_3)
+boxplot(res~`Internet Service`,xlab="Gender",ylab = "Std residuals",data = newdata_3)
+
+
+
+qqnorm(res, ylab="Std residuals")
+qqline(res,col="blue",lwd=2)
+hist(res,10,xlab="Std residuals", main="")
+```
+
+
+
+
+
+
+
+# Aggregating data  - Aggregating by all categorical variables with tenure as categorical with bins defined on data transformation
+
+```{r}
+dat.reduced_3$`Churn Value` = as.numeric(dat.reduced_3$`Churn Value`)
+
+
+obdata.agg.n = aggregate(`Churn Value`~ . , data = dat.reduced_3, FUN=length)
+
+
+obdata.agg.y = aggregate(`Churn Value`~ . , data = dat.reduced_3, FUN=sum)
+
+Total <- obdata.agg.y$`Churn Value`
+
+data <- cbind(obdata.agg.n, Total)
+
+## Fitting the model
+
+model.agg = glm(cbind(`Churn Value`,difference)~ .,
+                data = data,family=binomial)
+
+## summary the model
+summary(model.agg)
+```
+
+
+
+## Goodness of fit 1
+
+```{r}
+## Test for overall regression
+gstat = model.agg$null.deviance - deviance(model.agg)
+cbind(gstat, 1-pchisq(gstat,length(coef(model.agg))-1))
+```
+
+The mdoel is not a good fit
+
+
+```{r}
+## Test for GOF: Using deviance residuals
+deviances2 = residuals(model.agg,type="deviance")
+dev.tvalue = sum(deviances2^2)
+c(dev.tvalue, 1-pchisq(dev.tvalue,40))
+#OR
+c(deviance(model.agg), 1-pchisq(deviance(model.agg),40))
+
+## Residual Analysis
+res = resid(model.agg,type="deviance")
+par(mfrow=c(2,2))
+boxplot(res~Gender,xlab="Age Group",ylab = "Std residuals",data = data)
+boxplot(res~`Senior Citizen`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~Partner,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~Dependents,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Phone Service`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Multiple Lines`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~`Internet Service`,xlab="Gender",ylab = "Std residuals",data = data)
+boxplot(res~Tenure,xlab="Gender",ylab = "Std residuals",data = data)
+
+
+qqnorm(res, ylab="Std residuals")
+qqline(res,col="blue",lwd=2)
+hist(res,10,xlab="Std residuals", main="")
+```
+
